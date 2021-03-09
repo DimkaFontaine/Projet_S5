@@ -69,6 +69,7 @@ class Car:
             sensor.delta_scale = (0.005, 0.0025, 0.0025)
             return sensor
         
+        O.object.select_all(action='DESELECT')
         
         # Build main body
         bpy.ops.mesh.primitive_cube_add() 
@@ -164,9 +165,23 @@ class Car:
         
         O.object.select_all(action='DESELECT')
         
-        for o in bpy.context.scene.objects: 
-            if o.type == 'MESH': 
-                o.select_set(True) 
+        body.select_set(True)
+        lineSensor0.select_set(True)
+        lineSensor1.select_set(True)
+        lineSensor2.select_set(True)
+        lineSensor3.select_set(True)
+        lineSensor4.select_set(True)
+        lineSupport.select_set(True)
+        lineToCarSupport.select_set(True)
+        poll1.select_set(True)
+        poll2.select_set(True)
+        soundSensorR.select_set(True)
+        soundSensorL.select_set(True)
+        wheelFR.select_set(True)
+        wheelFL.select_set(True)
+        wheelBR.select_set(True)
+        wheelBL.select_set(True)
+        
         car.select_set(True)
         
         O.object.parent_set(type='OBJECT')
@@ -194,7 +209,7 @@ class Car:
     #       [0] : name of the object detected (None if not detected)
     #       [1] : distance of the object detected (-1 if not detected)
     #
-    def sensorFeedback(self,sensor, orientation, colliders): 
+    def sensorFeedback(self, sensor, orientation, colliders): 
         
         def addVec3(a,b):
             c = [0.0,0.0,0.0]
@@ -211,23 +226,47 @@ class Car:
             return c
 
         def distance3(vector):
-            return pow((pow(vector[0],2)+pow(vector[1],2))+pow(vector[2],2),0.5)
+            return pow((pow(abs(vector[0]),2)+pow(abs(vector[1]),2))+pow(abs(vector[2]),2),0.5)
         
         for col in colliders: 
-            loc = [sensor.location[0]-col.location[0],sensor.location[1]-col.location[1],sensor.location[2]-col.location[2]]
+            sensorLoc = self.body.location + sensor.location
+            loc = sensorLoc-col.location
             results = col.ray_cast(loc, orientation) 
+            print(results)
             if results[0]: 
                 q = addVec3(col.location,results[1])
                 v = minusVec3(q,sensor.location)
                 d = distance3(v)
                 return [col.name,d] 
-        return [None,-1.0]
+        return [None,50.0]
+    
+    
+    def localToWorld():
+        return
     
     
     def getSonar(self):
+        
         s1 = bpy.context.scene.objects['SoundSensorR']
-#        self.sensorFeedback()
-        return
+        s2 = bpy.context.scene.objects['SoundSensorL']
+        currAngle = self.body.rotation_euler[2]
+        currentAngle = currAngle - (math.pi/12)
+        angles = []
+        results = []
+        
+        for i in range(5):
+            angles.append(currentAngle + (i*(math.pi/24)))
+        
+        for rad in angles:
+            results.append(self.sensorFeedback(s1, [math.cos(rad), math.sin(rad), 0.0], self.obstacles))
+            results.append(self.sensorFeedback(s2, [math.cos(rad), math.sin(rad), 0.0], self.obstacles))
+        
+        def sortFunc(a):
+            return a[1]
+        
+        results.sort(key = sortFunc)
+        print(results)
+        return results[0]
     
     
 
@@ -237,8 +276,27 @@ clearMesh()      # destroy all mesh object && reset animation too the start
 os.system("cls") # clean console 
 print("Start") 
 
-car = Car(orientation = math.pi/2)
 
+bpy.ops.mesh.primitive_cube_add() 
+C.active_object.name = "Obs" 
+obs =C.active_object
+obs.delta_scale = (0.05, 0.05, 0.1)
+obs.location = (1.0,1.8,0.0)
+
+
+car = Car(orientation = math.pi/2, obstacles = [obs])
+
+
+
+
+
+
+
+
+
+val = car.getSonar()
+
+print(val)
 
 
 print("End")
