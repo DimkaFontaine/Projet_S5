@@ -17,6 +17,100 @@ def clearMesh():
             o.select_set(False)
     bpy.ops.object.delete() 
 
+def addVec3(a,b):
+    c = [0.0,0.0,0.0]
+    c[0] = a[0] + b[0]
+    c[1] = a[1] + b[1]
+    c[2] = a[2] + b[2] 
+    return c
+
+def minusVec3(a,b):
+    c = [0.0,0.0,0.0]
+    c[0] = a[0] - b[0]
+    c[1] = a[1] - b[1]
+    c[2] = a[2] - b[2] 
+    return c
+
+def minusVec2(a,b):
+    c = [0.0,0.0]
+    c[0] = a[0] - b[0]
+    c[1] = a[1] - b[1] 
+    return c
+        
+def multVec3(a,b):
+    c = [0.0,0.0,0.0]
+    c[0] = a[0] * b[0]
+    c[1] = a[1] * b[1]
+    c[2] = a[2] * b[2] 
+    return c
+
+def multVec2(a,b):
+    c = [0.0,0.0]
+    c[0] = a[0] * b[0]
+    c[1] = a[1] * b[1] 
+    return c
+
+def prodScalarVec3(a,b):
+    c = multVec3(a,b)
+    return c[0]+ c[1] + c[2]
+
+def prodScalarVec2(a,b):
+    c = multVec2([a[0],a[1],0.0],b)
+    return c[0]+ c[1]
+
+
+
+def rectCornerToWorld(col):
+    a =  [col.scale[0]*math.cos(col.rotation_euler[2]) - col.scale[1]*math.sin(col.rotation_euler[2]), col.scale[0]*math.sin(col.rotation_euler[2]) + col.scale[1]*math.cos(col.rotation_euler[2])]
+    b =  [col.scale[0]*math.cos(col.rotation_euler[2]) - (-col.scale[1])*math.sin(col.rotation_euler[2]), col.scale[0]*math.sin(col.rotation_euler[2]) + (-col.scale[1])*math.cos(col.rotation_euler[2])]    
+    c = [(-col.scale[0])*math.cos(col.rotation_euler[2]) - (-col.scale[1])*math.sin(col.rotation_euler[2]), (-col.scale[0])*math.sin(col.rotation_euler[2]) + (-col.scale[1])*math.cos(col.rotation_euler[2])]
+    d =  [(-col.scale[0])*math.cos(col.rotation_euler[2]) - col.scale[1]*math.sin(col.rotation_euler[2]), (-col.scale[0])*math.sin(col.rotation_euler[2]) + col.scale[1]*math.cos(col.rotation_euler[2])]
+
+    a = [col.location[0]+a[0], col.location[1]+a[1]]
+    b = [col.location[0]+b[0], col.location[1]+b[1]]
+    c = [col.location[0]+c[0], col.location[1]+c[1]]
+    d = [col.location[0]+d[0], col.location[1]+d[1]]
+    
+    return a,b,c,d
+
+
+
+def pointInRect(p, rect):
+    
+    a,b,c,d = rectCornerToWorld(rect)
+    
+    vecAB = minusVec2(b,a)
+    vecAD = minusVec2(d,a)
+    vecAP = minusVec2(p,a)
+    
+    vecCB = minusVec2(b,c)
+    vecCD = minusVec2(d,c)
+    vecCP = minusVec2(p,c)
+    
+    val = prodScalarVec2(vecCP,vecCB) > 0 and prodScalarVec2(vecCP,vecCD) > 0 and prodScalarVec2(vecAP,vecAB) > 0 and prodScalarVec2(vecAP,vecAD) > 0
+    
+    return val
+
+
+def distance3(vector):
+    return pow((pow(abs(vector[0]),2)+pow(abs(vector[1]),2))+pow(abs(vector[2]),2),0.5)
+
+def rayCast2dObstacle(posInit, orientation, col, maxDistance = 3.0, precision = 0.001):
+
+    minDistancePossible = distance3(col.location) - distance3([col.scale[0],col.scale[1],0.0])
+    rayStep = [0.0, 0.0, 0.0]
+    for i in range(3):
+        rayStep[i] = orientation[i]*precision
+    ray = [0.0, 0.0, 0.0]
+    
+    while distance3(ray) < maxDistance :
+        ray = addVec3(ray,rayStep)
+        pos  = addVec3(posInit,ray)
+        if distance3(pos) > minDistancePossible :
+            if pointInRect(pos,col):
+                return [True, pos]
+    return [False, [0.0,0.0,0.0]]
+
 
 
 class Car:
@@ -28,6 +122,7 @@ class Car:
         self.body.rotation_euler[2] = orientation
         self.obstacles = obstacles
         self.lines = lines
+        self.speed = 0.0
 
     def buildCar(self):
         
@@ -188,67 +283,21 @@ class Car:
         O.object.parent_set(type='OBJECT')
         O.object.select_all(action='DESELECT')
         
-        
-        
         return car
     
-    
-    
 
-
-    # sensorFeedback(sensor, orientation, colliders)
-    #   -description:
-    #       simulate the behavior of a sensor A.K.A Usful and usable raycasting
-    #   -param:
-    #       sensor: 
-    #           mesh object that simulates the sensor
-    #       orientation: 
-    #           the orientation that we want it to detect, in relation to the world (independent of the orientation of the sensor)
-    #       colliders:
-    #           list of objects that we want to be able to detect
-    #   -return:
-    #       [0] : name of the object detected (None if not detected)
-    #       [1] : distance of the object detected (-1 if not detected)
-    #
+    
     def sensorFeedback(self, sensorPosition, orientation, colliders): 
-        
-        def addVec3(a,b):
-            c = [0.0,0.0,0.0]
-            c[0] = a[0] + b[0]
-            c[1] = a[1] + b[1]
-            c[2] = a[2] + b[2] 
-            return c
-
-        def minusVec3(a,b):
-            c = [0.0,0.0,0.0]
-            c[0] = a[0] - b[0]
-            c[1] = a[1] - b[1]
-            c[2] = a[2] - b[2] 
-            return c
-        
-        def multVec3(a,b):
-            c = [0.0,0.0,0.0]
-            c[0] = a[0] * b[0]
-            c[1] = a[1] * b[1]
-            c[2] = a[2] * b[2] 
-            return c
-
-        def distance3(vector):
-            return pow((pow(abs(vector[0]),2)+pow(abs(vector[1]),2))+pow(abs(vector[2]),2),0.5)
-        
         for col in colliders: 
-            loc = minusVec3(sensorPosition, col.location)
-            print()
-            print("loc, orientation ----------------------------------------------")
-            print(loc, orientation)
-            print("--------------------------------------------------------------")
-            results = col.ray_cast(loc, orientation) 
-            print(results)
+            results = rayCast2dObstacle(sensorPosition, orientation, col) 
             if results[0]: 
-                posHit = multVec3(results[1], col.scale)
-                q = addVec3(col.location,posHit)
-                print(q)
-                v = minusVec3(q,sensorPosition)
+                if False:
+                    print(results)
+                    bpy.ops.mesh.primitive_cube_add()
+                    obs2 =C.active_object
+                    obs2.scale = (0.01, 0.01, 1.0)
+                    obs2.location = results[1]
+                v = minusVec3(results[1],sensorPosition)
                 d = distance3(v)
                 return [col.name,d] 
         return [None,50.0]
@@ -271,62 +320,89 @@ class Car:
         
         soundR = self.localToWorldLocation(C.scene.objects['SoundSensorR'])
         soundL = self.localToWorldLocation(C.scene.objects['SoundSensorL'])
-        print(soundR)
-        rad = self.body.rotation_euler[2]
-#        currentAngle = currAngle - (math.pi/12)
-#        angles = []
+        currentAngle = self.body.rotation_euler[2] - (math.pi/12)
+        angles = []
         results = []
         
-#        for i in range(5):
-#            angles.append(currentAngle + (i*(math.pi/24)))
+        for i in range(5):
+            angles.append(currentAngle + (i*(math.pi/24)))
         
-#        for rad in angles:
-        results.append(self.sensorFeedback(soundR, [math.cos(rad)/100, math.sin(rad)/100, 0.0], self.obstacles))
-        results.append(self.sensorFeedback(soundL, [math.cos(rad), math.sin(rad), 0.0], self.obstacles))
+        for rad in angles:
+            results.append(self.sensorFeedback(soundR, [math.cos(rad), math.sin(rad), 0.0], self.obstacles))
+            results.append(self.sensorFeedback(soundL, [math.cos(rad), math.sin(rad), 0.0], self.obstacles))
         
         def sortFunc(a):
             return a[1]
         
         results.sort(key = sortFunc)
-        print("Results ========================================")
-        print(results)
-        return results[0]
+        return results[0][1]
     
     
+    
+    def setSpeed(self, percent):
+        self.speed = 0.0028 * percent - 0.0277
+        if percent <16:
+            self.speed = 0.0
+        
+    def update1in24frame(self):
+        x = self.speed*math.cos(self.body.rotation_euler[2])
+        y = self.speed*math.sin(self.body.rotation_euler[2])
+        self.body.location[0] = self.body.location[0] + x
+        self.body.location[1] = self.body.location[1] + y
+        
+        
+    
+
+def testDetectionObstacle():
+    bpy.ops.mesh.primitive_cube_add() 
+    C.active_object.name = "Obs" 
+    obs =C.active_object
+    obs.dimensions = (0.2, 0.2, 0.3)
+    obs.location = (0.0,1.8,0.0)
+    obs.rotation_euler[2] = math.pi/4
+
+    bpy.ops.mesh.primitive_cube_add() 
+    C.active_object.name = "Obs1" 
+    obs1 = C.active_object
+    obs1.dimensions = (0.2, 0.2, 0.3)
+    obs1.location = (1.0,1.0,0.0)
+
+
+    car = Car(orientation = math.pi*(1.0/4.0), obstacles = [obs,obs1])
+
+    car.body.location[0] = 0.5
+    car.body.location[1] = 0.5
+
+    val = car.getSonar()
+    print(val)
+
+
+def testAvance():
+
+    car = Car(orientation = math.pi*(1.0/2.0))
+    
+    car.setSpeed(20)
+    
+    frames = 250 
+    for i in range(frames): 
+    
+        C.scene.frame_set(i) 
+        car.update1in24frame()
+        O.anim.keyframe_insert(type = "Location") 
+        
+    # Play
+    O.screen.animation_play() 
+
+
+
 
 print("Reset") 
 
 clearMesh()      # destroy all mesh object && reset animation too the start
 os.system("cls") # clean console 
-print("Start") 
-
-
-bpy.ops.mesh.primitive_cube_add() 
-C.active_object.name = "Obs" 
-obs =C.active_object
-obs.dimensions = (0.2, 0.1, 0.3)
-obs.location = (0.0,0.5,0.0)
-
-
-
-
-
-
-car = Car(orientation = math.pi/2, obstacles = [obs])
-
-
-
-
-
-
-
-val = car.getSonar()
-
-#bpy.ops.mesh.primitive_cube_add() 
-#C.active_object.name = "Obs2" 
-#obs2 =C.active_object
-#obs2.scale = (0.01, 0.01, 1.0)
-#obs2.location = (0.0034999870285389867, 0.5999999955296516, 0.026250002831220698)
-
+print("Start")
+ 
+#testDetectionObstacle()
+testAvance()
 
 print("End")
