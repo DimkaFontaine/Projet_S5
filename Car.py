@@ -114,16 +114,27 @@ def rayCast2dObstacle(posInit, orientation, col, maxDistance = 3.0, precision = 
 
 
 class Car:
-    def __init__(self, location = (0.0,0.0), orientation = 0.0, obstacles = [], lines = []):
+
+
+    # INIT
+    def __init__(self, location = (0.0,0.0), orientation = 0.0, obstacles = [], rightLines = [], curveLines = []):
         self.body = self.buildCar();
         self.body.location[0] = location[0]
         self.body.location[1] = location[1]
         self.body.location[2] = 0.0675
         self.body.rotation_euler[2] = orientation
         self.obstacles = obstacles
-        self.lines = lines
+        self.rightLines = rightLines
+        self.curveLines = curveLines
         self.speed = 0.0
+        self.turn = 0.0
+        self.t = 1.0
 
+
+
+
+
+    # MODELISATION
     def buildCar(self):
         
         def makeHole(main, hole):
@@ -286,6 +297,7 @@ class Car:
         return car
     
 
+    # Sensors ------------------------------------------------------
     
     def sensorFeedback(self, sensorPosition, orientation, colliders): 
         for col in colliders: 
@@ -338,20 +350,86 @@ class Car:
         return results[0][1]
     
     
+    def detectLigne(self):
+        s0 = self.localToWorldLocation(C.scene.objects['LineSensor0'])
+        s1 = self.localToWorldLocation(C.scene.objects['LineSensor1'])
+        s2 = self.localToWorldLocation(C.scene.objects['LineSensor2'])
+        s3 = self.localToWorldLocation(C.scene.objects['LineSensor3'])
+        s4 = self.localToWorldLocation(C.scene.objects['LineSensor4'])
+        
+        s = [s0,s1,s2,s3,s4]
+        results = [False,False,False,False,False,]
+        for i in range(5):
+            for l in range(len(self.rightLines)):
+                if pointInRect(s[i], self.rightLines[l]) :
+                    results[i] = True
+        return results
+        
+  
+    
+    
+    
+    
+    # Movement ------------------------------------------------------------
+    
+    def accelerate(self, percent):
+        percent = 100 - percent
+        if percent > 16:
+            gamma = self.acceleration(percent)
+            self.speed = gamma*self.t/24.0
+            print(gamma)
+            self.t+=1.0
+        else:
+            self.speed =0.0
+        
+
+    def acceleration(self,percentage):
+        eta = 0.95
+        V = 4.5
+        InoLoad = 0.105
+        IdeltaLoad = 0.0
+        m = 1
+        nrpm = (percentage*180)/100
+        r = 0.035
+        g = 9.81
+        Crr = 0.01
+        direction = 1
+        Pm = eta*V*(InoLoad + IdeltaLoad)
+        print(" val: ",m*nrpm*r*math.pi/60.0)
+        gamma = direction*(Pm/(m*nrpm*r*math.pi/60.0)-g/2*Crr)
+        return gamma
     
     def setSpeed(self, percent):
+#        self.accelerate(percent)
+        
         self.speed = 0.0028 * percent - 0.0277
         if percent <16:
             self.speed = 0.0
+            
+    def setWheels(self, deg):
+        self.turn = (-(deg - 90)* math.pi)/360
         
     def update1in24frame(self):
-        x = self.speed*math.cos(self.body.rotation_euler[2])
-        y = self.speed*math.sin(self.body.rotation_euler[2])
+        self.updateRotate()
+        self.updateLocation()
+        self.setKeyframe()
+        
+    def setKeyframe(self):
+        self.body.keyframe_insert(data_path = 'location')
+        self.body.keyframe_insert(data_path = 'rotation_euler')
+        
+    def updateLocation(self):
+        x = self.speed*math.cos(self.body.rotation_euler[2])/24
+        y = self.speed*math.sin(self.body.rotation_euler[2])/24
         self.body.location[0] = self.body.location[0] + x
         self.body.location[1] = self.body.location[1] + y
         
-        
-    
+    def updateRotate(self):
+        if self.speed > 0.0:
+            deltaWheels = 0.145
+            nbTic = (deltaWheels/(self.speed/24))
+            deltaTurn = self.turn/nbTic
+            self.body.rotation_euler[2] = self.body.rotation_euler[2]+deltaTurn
 
 def testDetectionObstacle():
     bpy.ops.mesh.primitive_cube_add() 
@@ -377,24 +455,55 @@ def testDetectionObstacle():
     print(val)
 
 
-def testAvance():
+def testSpeedAndTurn():
 
     car = Car(orientation = math.pi*(1.0/2.0))
     
-    car.setSpeed(20)
+    car.setSpeed(30)
     
     frames = 250 
     for i in range(frames): 
     
         C.scene.frame_set(i) 
-        car.update1in24frame()
-        O.anim.keyframe_insert(type = "Location") 
-        
+        car.update1in24frame() 
+        if i == 80:
+            car.setWheels(0)
+        if i == 200:
+            car.setWheels(90)
+            car.setSpeed(80)
+        if i == 220:
+            car.setWheels(180)
+        if i == 240:
+            car.setSpeed(0)
     # Play
     O.screen.animation_play() 
 
+def testLines():
+    
+    bpy.ops.mesh.primitive_plane_add() 
+    C.active_object.name = "Ligne" 
+    obs1 = C.active_object
+    obs1.scale = (0.009, 0.5, 1.0)
+    obs1.location = (0.00,1.0,0.0)
+    obs1.rotation_euler[2] = math.pi/20
+    
+    car = Car(orientation = math.pi*(1.0/2.0), rightLines = [obs1])
+    car.setSpeed(50)
+    
+    frames = 250 
+    for i in range(frames): 
+    
+        C.scene.frame_set(i) 
+        car.update1in24frame() 
+        r = car.detectLigne()
+        if r[1]:
+            car.setSpeed(0)
+        
+    # Play
+    O.screen.animation_play()
 
 
+# //////////////////////////   RUN   ///////////////////////////////////////////////
 
 print("Reset") 
 
@@ -403,6 +512,7 @@ os.system("cls") # clean console
 print("Start")
  
 #testDetectionObstacle()
-testAvance()
+#testSpeedAndTurn()
+testLines()
 
 print("End")
