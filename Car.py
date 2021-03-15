@@ -431,7 +431,16 @@ class Car:
             deltaTurn = self.turn/nbTic
             self.body.rotation_euler[2] = self.body.rotation_euler[2]+deltaTurn
 
-def testDetectionObstacle():
+
+
+#/////////////////////////////    Fonction Test   //////////////////////////////////////////////////////////
+
+
+def testModelisation():
+    car = Car()
+
+
+def testDetectionObstacle(case):
     bpy.ops.mesh.primitive_cube_add() 
     C.active_object.name = "Obs" 
     obs =C.active_object
@@ -445,9 +454,13 @@ def testDetectionObstacle():
     obs1.dimensions = (0.2, 0.2, 0.3)
     obs1.location = (1.0,1.0,0.0)
 
-
-    car = Car(orientation = math.pi*(1.0/4.0), obstacles = [obs,obs1])
-
+    if case == 0:
+        car = Car(orientation = math.pi*(1.0/4.0), obstacles = [obs,obs1])
+    elif case == 1:
+        car = Car(orientation = math.pi*(12.0/20.0), obstacles = [obs,obs1])
+    else:
+        car = Car(obstacles = [obs,obs1])
+    
     car.body.location[0] = 0.5
     car.body.location[1] = 0.5
 
@@ -459,26 +472,27 @@ def testSpeedAndTurn():
 
     car = Car(orientation = math.pi*(1.0/2.0))
     
-    car.setSpeed(30)
+    car.setSpeed(40)
     
     frames = 250 
     for i in range(frames): 
     
         C.scene.frame_set(i) 
         car.update1in24frame() 
-        if i == 80:
+        if i == 40:
             car.setWheels(0)
-        if i == 200:
+        if i == 140:
             car.setWheels(90)
             car.setSpeed(80)
-        if i == 220:
+        if i == 180:
+            car.setSpeed(40)
             car.setWheels(180)
         if i == 240:
             car.setSpeed(0)
     # Play
     O.screen.animation_play() 
 
-def testLines():
+def testLines(case):
     
     bpy.ops.mesh.primitive_plane_add() 
     C.active_object.name = "Ligne" 
@@ -496,14 +510,14 @@ def testLines():
         C.scene.frame_set(i) 
         car.update1in24frame() 
         r = car.detectLigne()
-        if r[1]:
+        if r[case]:
             car.setSpeed(0)
         
     # Play
     O.screen.animation_play()
 
 
-# //////////////////////////   RUN   ///////////////////////////////////////////////
+# //////////////////////////   RUN TEST   ///////////////////////////////////////////////
 
 print("Reset") 
 
@@ -511,8 +525,11 @@ clearMesh()      # destroy all mesh object && reset animation too the start
 os.system("cls") # clean console 
 print("Start")
  
-#testDetectionObstacle()
+testModelisation()
+#testDetectionObstacle(0)
+#testDetectionObstacle(1)
 #testSpeedAndTurn()
-testLines()
+#testLines(1)
+#testLines(3)
 
 print("End")
