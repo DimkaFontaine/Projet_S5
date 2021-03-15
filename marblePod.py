@@ -32,8 +32,8 @@ class MarblePod:
                 O.rigidbody.object_add()
                 C.object.rigid_body.type = 'PASSIVE'
                 pod = C.active_object
-                marble = C.active_object
-                marbleName = 'Pod'
+                podName = 'Pod'
+                C.active_object.name = podName
                 hole = buildHoleSolid(self)
                 makeHole(pod, hole, 'Hole Solid')
                 pod.select_set(True)
@@ -78,12 +78,7 @@ class MarblePod:
                 marbleName = 'Marble'
                 C.active_object.name = marbleName
                 setMaterial(marble, makeMaterial('Blue',(0,0,0.5,1),(1,1,1)))
-
                 return marble
             
             buildPod(self)
             buildMarble(self)
-
-#clearMesh()            
-     
-#marblePod = MarblePod(location = (0,0,0,0))
