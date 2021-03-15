@@ -29,6 +29,8 @@ class MarblePod:
         
             def buildPod(self):
                 O.mesh.primitive_cube_add(location = (self.location[1],self.location[2],self.location[2] -0.0005), scale = (0.05, 0.05, 0.004))  
+                O.rigidbody.object_add()
+                C.object.rigid_body.type = 'PASSIVE'
                 pod = C.active_object
                 hole = buildHoleSolid(self)
                 makeHole(pod, hole, 'Hole Solid')
@@ -68,10 +70,13 @@ class MarblePod:
             
             def buildMarble(self):
                 O.mesh.primitive_uv_sphere_add(ring_count = 64, segments = 64, location = (self.location[1],self.location[2],self.location[3] + 0.0075), scale = (0.015,0.015,0.015))
+                O.rigidbody.object_add()
+                C.object.rigid_body.collision_shape = 'MESH'
                 marble = C.active_object
                 marbleName = 'Marble'
                 C.active_object.name = marbleName
                 setMaterial(marble, makeMaterial('Blue',(0,0,0.5,1),(1,1,1)))
+
                 return marble
             
             buildPod(self)
