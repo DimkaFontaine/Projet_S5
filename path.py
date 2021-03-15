@@ -33,137 +33,92 @@ def makeIntersect(main, intersect):
     bool_one.object = intersect
     bool_one.operation = 'INTERSECT'
     bpy.ops.object.modifier_apply({"object": main},modifier="Boolean")
-    return    
+    return  
 
-def straightLineForwardTest(X,Y):
-    O.mesh.primitive_plane_add() 
-    C.active_object.name = "StraightLine0_4" 
-    lineToCarSupport =C.active_object
-    lineToCarSupport.scale = (X,Y, 0)
-    lineToCarSupport.location = (0,Y,0)
+def straightPath(name, scale_x = 0.009,scale_y = 0.009, loc_x =0, loc_y =0):
+    O.mesh.primitive_plane_add()
+    C.active_object.name = name
+    path =C.active_object
+    path.scale = (scale_x,scale_y, 0)
+    path.location = (loc_x, loc_y,0)
     
-def straightLineBackwardTest(X,Y):
-    O.mesh.primitive_plane_add() 
-    C.active_object.name = "StraightLine-4_0" 
-    lineToCarSupport =C.active_object
-    lineToCarSupport.scale = (X,Y, 0)
-    lineToCarSupport.location = (0,-Y,0)
+    return path
     
-def straightLineForwardWithObstacleTest(X,Y):
-    straightLineForwardTest(X,Y)
+    
+    #direction L = left
+    #          R = right
+def turnPath(name, radius, direction = 'L', loc_x =0, loc_y =0):
+    O.mesh.primitive_plane_add()  
+    path = C.active_object
+    C.active_object.name = name
+    path.scale = (radius, radius, 1.0)
+    path.location = (0.0, radius, 0.0)
+    
+    bpy.ops.mesh.primitive_cylinder_add(vertices = 128) 
+    C.active_object.name = "Hole maker" 
+    hole_maker = C.active_object
+    hole_maker.scale = ((radius - 0.009), (radius - 0.009), 1.0) 
+    
+    if direction == 'L':
+        direction_location = radius * -1
+    else:
+        direction_location = radius
+    
+    hole_maker.location = (direction_location , 0.0, 0.0)
+    
+    makeHole(path, hole_maker)
+    
+    hole_maker = C.active_object
+    hole_maker.scale = ((radius + 0.009), (radius + 0.009), 1.0)
+    
+    makeIntersect(path, hole_maker)
+    
+    O.object.select_all(action='DESELECT')
+    path.select_set(False)
+    D.objects['Hole maker'].select_set(True)
+    O.object.delete() 
+    
+    return path
+    
+
+#test path creation functions  
+
+def straightLineForwardTest():
+    straightPath("StraightLineForward", scale_y = 1, loc_y = 1)
+    
+    
+def straightLineBackwardTest():
+    straightPath("StraightLineBackward", scale_y = 1, loc_y = 1)
+    
+def straightLineForwardWithObstacleTest():
+    straightPath("StraightLineForward", scale_y = 1, loc_y = 1)
     O.mesh.primitive_cube_add() 
     C.active_object.name = "Obstacle" 
     lineToCarSupport =C.active_object
-    lineToCarSupport.scale = (X, X, 0.5)
-    lineToCarSupport.location = (0,(Y*2),0)
+    lineToCarSupport.scale = (0.01, 0.01, 0.5)
+    lineToCarSupport.location = (0,2,0)
 
-def straightLineForwardWithObstacleInMiddleTest(X,Y):
-    straightLineForwardTest(X,Y)
+def straightLineForwardWithObstacleInMiddleTest():
+    straightPath("StraightLineForward", scale_y = 1, loc_y = 1)
     O.mesh.primitive_cube_add() 
     C.active_object.name = "Obstacle" 
     lineToCarSupport =C.active_object
-    lineToCarSupport.scale = (X, X, 0.5)
-    lineToCarSupport.location = (0,Y,0)
+    lineToCarSupport.scale = (0.01, 0.01, 0.5)
+    lineToCarSupport.location = (0,1,0)
 
-def leftCurve():
-    O.mesh.primitive_plane_add()  
-    path1 = C.active_object
-    path1.scale = (5.0, 5.0, 1.0)
-    path1.location = (0.0, 5.0, 0.0)
-    
-    bpy.ops.mesh.primitive_cylinder_add() 
-    C.active_object.name = "Hole maker" 
-    hole_maker = C.active_object
-    hole_maker.scale = (4.991, 4.991, 1.0) 
-    hole_maker.location = (-5.0, 0.0, 0.0) 
-    
-    makeHole(path1, hole_maker)
-    
-    hole_maker = C.active_object
-    hole_maker.scale = (5.009, 5.009, 1.0)
-    
-    makeIntersect(path1, hole_maker)
-    
-    O.object.select_all(action='DESELECT')
-    path1.select_set(False)
-    D.objects['Hole maker'].select_set(True)
-    O.object.delete()
+def leftCurveTest():
+    turnPath("leftTest", 0.12, direction = 'L')
     
 
-def rightCurve():
-    O.mesh.primitive_plane_add()  
-    path1 = C.active_object
-    path1.scale = (5.0, 5.0, 1.0)
-    path1.location = (0.0, 5.0, 0.0)
-    
-    bpy.ops.mesh.primitive_cylinder_add() 
-    C.active_object.name = "Hole maker" 
-    hole_maker = C.active_object
-    hole_maker.scale = (4.991, 4.991, 1.0) 
-    hole_maker.location = (5.0, 0.0, 0.0) 
-    
-    makeHole(path1, hole_maker)
-    
-    hole_maker = C.active_object
-    hole_maker.scale = (5.009, 5.009, 1.0)
-    
-    makeIntersect(path1, hole_maker)
-    
-    O.object.select_all(action='DESELECT')
-    path1.select_set(False)
-    D.objects['Hole maker'].select_set(True)
-    O.object.delete()
+def rightCurveTest():
+    turnPath("rightTest", 0.5, direction = 'R')
 
-def tightLeftCurve():
-    O.mesh.primitive_plane_add()  
-    path1 = C.active_object
-    path1.scale = (1.2, 1.2, 1.0)
-    path1.location = (0.0, 1.2, 0.0)
-    
-    bpy.ops.mesh.primitive_cylinder_add() 
-    C.active_object.name = "Hole maker" 
-    hole_maker = C.active_object
-    hole_maker.scale = (1.191, 1.191, 1.0) 
-    hole_maker.location = (-1.2, 0.0, 0.0) 
-    
-    makeHole(path1, hole_maker)
-    
-    hole_maker = C.active_object
-    hole_maker.scale = (1.209, 1.209, 1.0)
-    
-    makeIntersect(path1, hole_maker)
-    
-    O.object.select_all(action='DESELECT')
-    path1.select_set(False)
-    D.objects['Hole maker'].select_set(True)
-    O.object.delete()
+def tightLeftCurveTest():
+    turnPath("leftTightTest", 0.12, direction = 'L')
     
    
-def tightRightCurve():
-    O.mesh.primitive_plane_add()  
-    path1 = C.active_object
-    path1.scale = (1.2, 1.2, 1.0)
-    path1.location = (0.0, 1.2, 0.0)
-    
-    bpy.ops.mesh.primitive_cylinder_add() 
-    C.active_object.name = "Hole maker" 
-    hole_maker = C.active_object
-    hole_maker.scale = (1.191, 1.191, 1.0) 
-    hole_maker.location = (1.2, 0.0, 0.0) 
-    
-    makeHole(path1, hole_maker)
-    
-    hole_maker = C.active_object
-    hole_maker.scale = (1.209, 1.209, 1.0)
-    
-    makeIntersect(path1, hole_maker)
-    
-    O.object.select_all(action='DESELECT')
-    path1.select_set(False)
-    D.objects['Hole maker'].select_set(True)
-    O.object.delete()
-    
-
+def tightRightCurveTest():
+    turnPath("rightTightTest", 0.12, direction = 'R')
 print("Reset") 
 
 clearMesh()      # destroy all mesh object && reset animation too the start
@@ -172,6 +127,6 @@ os.system("cls") # clean console
 print() 
 print("Start") 
 
-path = tightRightCurve()
+rightCurveTest()
 
 print("end")
