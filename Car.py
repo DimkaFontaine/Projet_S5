@@ -1,9 +1,15 @@
 import os 
+import sys
 import math 
 import bpy 
 from bpy import context as C 
 from bpy import data as D 
 from bpy import ops as O
+
+#FULL PATH TO: marblePod.py
+#filename = 'C:\Repos\Projet_S5\marblePod.py'
+exec(compile( open(filename).read(), filename, 'exec'))
+    
 
 def clearMesh():
     bpy.ops.screen.animation_cancel(restore_frame=True)
@@ -438,8 +444,8 @@ class Car:
 
 def testModelisation():
     car = Car()
-
-
+    marblePod = MarblePod(location = (0,0,0,0.1125))
+    
 def testDetectionObstacle(case):
     bpy.ops.mesh.primitive_cube_add() 
     C.active_object.name = "Obs" 

@@ -5,19 +5,19 @@ from bpy import context as C
 from bpy import data as D 
 from bpy import ops as O
 
-os.system("cls") # clean console 
+#os.system("cls") # clean console 
 
-def clearMesh():
-    bpy.ops.screen.animation_cancel(restore_frame=True)
-    O.object.select_all(action='DESELECT')
-    for o in bpy.context.scene.objects: 
-        if o.type == 'MESH': 
-            o.select_set(True) 
-        elif o.name == 'MarblePod':
-            o.select_set(True)
-        else: 
-            o.select_set(False)
-    bpy.ops.object.delete() 
+#def clearMesh():
+#    bpy.ops.screen.animation_cancel(restore_frame=True)
+#    O.object.select_all(action='DESELECT')
+#    for o in bpy.context.scene.objects: 
+#        if o.type == 'MESH': 
+#            o.select_set(True) 
+#        elif o.name == 'MarblePod':
+#            o.select_set(True)
+#        else: 
+#            o.select_set(False)
+#    bpy.ops.object.delete() 
     
     
 class MarblePod:
@@ -28,7 +28,7 @@ class MarblePod:
         def buildMarblePod(self):
         
             def buildPod(self):
-                O.mesh.primitive_cube_add(location = (self.location[1],self.location[2],self.location[2] -0.0005), scale = (0.05, 0.05, 0.004))  
+                O.mesh.primitive_cube_add(location = (self.location[1],self.location[2],self.location[3] -0.0005), scale = (0.05, 0.05, 0.004))  
                 O.rigidbody.object_add()
                 C.object.rigid_body.type = 'PASSIVE'
                 pod = C.active_object
@@ -82,6 +82,6 @@ class MarblePod:
             buildPod(self)
             buildMarble(self)
 
-clearMesh()            
+#clearMesh()            
      
-marblePod = MarblePod(location = (0,0,0,0))
+#marblePod = MarblePod(location = (0,0,0,0))
