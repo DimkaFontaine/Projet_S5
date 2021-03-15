@@ -1,9 +1,13 @@
 import os 
+import sys
 import math 
 import bpy 
 from bpy import context as C 
 from bpy import data as D 
 from bpy import ops as O
+
+file = os.path.join(foldername[0:19], 'marblePod.py')
+exec(compile(open(file).read(), file, 'exec'))
 
 def clearMesh():
     bpy.ops.screen.animation_cancel(restore_frame=True)
@@ -438,8 +442,8 @@ class Car:
 
 def testModelisation():
     car = Car()
-
-
+    marblePod = MarblePod(location = (0.085, 0, 0.1125))
+    
 def testDetectionObstacle(case):
     bpy.ops.mesh.primitive_cube_add() 
     C.active_object.name = "Obs" 
@@ -520,11 +524,9 @@ def testLines(case):
 # //////////////////////////   RUN TEST   ///////////////////////////////////////////////
 
 print("Reset") 
-
 clearMesh()      # destroy all mesh object && reset animation too the start
 os.system("cls") # clean console 
 print("Start")
- 
 testModelisation()
 #testDetectionObstacle(0)
 #testDetectionObstacle(1)
