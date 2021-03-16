@@ -4,20 +4,13 @@ import bpy
 from bpy import context as C 
 from bpy import data as D 
 from bpy import ops as O
+foldername = bpy.context.space_data.text.filepath[0:-12]
 
-#os.system("cls") # clean console 
+file = os.path.join(foldername, 'tools.py')
+exec(compile(open(file).read(), file, 'exec'))
 
-#def clearMesh():
-#    bpy.ops.screen.animation_cancel(restore_frame=True)
-#    O.object.select_all(action='DESELECT')
-#    for o in bpy.context.scene.objects: 
-#        if o.type == 'MESH': 
-#            o.select_set(True) 
-#        elif o.name == 'MarblePod':
-#            o.select_set(True)
-#        else: 
-#            o.select_set(False)
-#    bpy.ops.object.delete() 
+
+os.system("cls") # clean console 
     
     
 class MarblePod:
@@ -51,18 +44,6 @@ class MarblePod:
                 me = ob.data
                 me.materials.append(mat)
                 
-            def makeHole(main, hole, holeMakerName):
-                bpy.ops.object.select_all(action='DESELECT')
-                main.select_set(True)
-                bool_one = main.modifiers.new(type="BOOLEAN", name="Boolean")
-                bool_one.object = hole
-                bool_one.operation = 'DIFFERENCE'
-                bpy.ops.object.modifier_apply({"object": main},modifier="Boolean")
-                O.object.select_all(action='DESELECT')
-                D.objects[holeMakerName].select_set(True)
-                O.object.delete()
-                return  
-    
             def buildHoleSolid(self):
                 O.mesh.primitive_uv_sphere_add(ring_count = 256, segments = 256, location = (self.location[0],self.location[1],self.location[2] + 0.14), scale = (0.28,0.28,0.28))
                 holeSolid = C.active_object

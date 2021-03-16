@@ -5,21 +5,12 @@ import bpy
 from bpy import context as C 
 from bpy import data as D 
 from bpy import ops as O
-
-file = os.path.join(foldername[0:19], 'marblePod.py')
+foldername = bpy.context.space_data.text.filepath[0:-7]
+file = os.path.join(foldername, 'marblePod.py')
+exec(compile(open(file).read(), file, 'exec'))
+file = os.path.join(foldername, 'tools.py')
 exec(compile(open(file).read(), file, 'exec'))
 
-def clearMesh():
-    bpy.ops.screen.animation_cancel(restore_frame=True)
-    O.object.select_all(action='DESELECT')
-    for o in bpy.context.scene.objects: 
-        if o.type == 'MESH': 
-            o.select_set(True) 
-        elif o.name == 'Car':
-            o.select_set(True)
-        else: 
-            o.select_set(False)
-    bpy.ops.object.delete() 
 
 def addVec3(a,b):
     c = [0.0,0.0,0.0]
@@ -148,22 +139,8 @@ class Car:
         self.turn = 0.0
         self.t = 1.0
 
-
-
-
-
     # MODELISATION
     def buildCar(self):
-        
-        def makeHole(main, hole):
-        
-            bpy.ops.object.select_all(action='DESELECT')
-            main.select_set(True)
-            bool_one = main.modifiers.new(type="BOOLEAN", name="Boolean")
-            bool_one.object = hole
-            bool_one.operation = 'DIFFERENCE'
-            bpy.ops.object.modifier_apply({"object": main},modifier="Boolean")
-            return    
         
         def makePoll():
             O.mesh.primitive_cylinder_add()  
@@ -214,11 +191,7 @@ class Car:
         hole_maker.location = (-0.08,0.045,-0.035)
         makeHole(body, hole_maker)
         hole_maker.location = (-0.08,-0.045,-0.035)
-        makeHole(body, hole_maker)
-        O.object.select_all(action='DESELECT')
-        body.select_set(False)
-        D.objects['Hole maker'].select_set(True)
-        O.object.delete()
+        makeHole(body, hole_maker, 'Hole maker')
         
         # Build polls
         poll1 = makePoll()
@@ -528,6 +501,22 @@ def testLines(case):
     car.setSpeed(50)
     
     frames = 250 
+    for i in range(frames): 
+    
+        C.scene.frame_set(i) 
+        car.update1in24frame() 
+        r = car.detectLigne()
+        if r[case]:
+            car.setSpeed(0)
+        
+    # Play
+    O.screen.animation_play()
+
+def testLines2(case, straight, curve):
+    car = Car(orientation = math.radians(90), rightLines = straight, curveLines = curve)
+    car.setSpeed(50)
+    
+    frames = 500 
     for i in range(frames): 
     
         C.scene.frame_set(i) 
