@@ -91,9 +91,23 @@ def pointInRect(p, rect):
     vecCD = minusVec2(d,c)
     vecCP = minusVec2(p,c)
     
-    val = prodScalarVec2(vecCP,vecCB) > 0 and prodScalarVec2(vecCP,vecCD) > 0 and prodScalarVec2(vecAP,vecAB) > 0 and prodScalarVec2(vecAP,vecAD) > 0
+    return prodScalarVec2(vecCP,vecCB) > 0 and prodScalarVec2(vecCP,vecCD) > 0 and prodScalarVec2(vecAP,vecAB) > 0 and prodScalarVec2(vecAP,vecAD) > 0
     
-    return val
+
+def pointInCurve(p, curve, demiLargeur = 0.009):
+    
+    c = curve.center
+    r = curve.radius
+    a0 = curve.rotation_euler[2]
+    a1 =  a0 + curve.angle
+    
+    vec = minusVec3(p,c)
+    distance = distance3(vec)
+    angle = math.atan(vec[1]/vec[0])
+    
+    return distance < r+demiLargeur and distance > r-demiLargeur and angle > a0 and angle < a1
+
+
 
 
 def distance3(vector):
@@ -367,6 +381,10 @@ class Car:
             for l in range(len(self.rightLines)):
                 if pointInRect(s[i], self.rightLines[l]) :
                     results[i] = True
+                    
+            for k in range(len(self.curveLines)):
+                if pointInCurve(s[i], self.curveLines[k]) :
+                    results[i] = True
         return results
         
   
@@ -406,6 +424,7 @@ class Car:
     def setSpeed(self, percent):
 #        self.accelerate(percent)
         
+        #Temp 
         self.speed = 0.0028 * percent - 0.0277
         if percent <16:
             self.speed = 0.0
@@ -527,7 +546,8 @@ print("Reset")
 clearMesh()      # destroy all mesh object && reset animation too the start
 os.system("cls") # clean console 
 print("Start")
-testModelisation()
+
+#testModelisation()
 #testDetectionObstacle(0)
 #testDetectionObstacle(1)
 #testSpeedAndTurn()
