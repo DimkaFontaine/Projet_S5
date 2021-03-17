@@ -4,9 +4,9 @@ import bpy
 from bpy import context as C 
 from bpy import data as D 
 from bpy import ops as O
-
-bpy.context.space_data.text.filepath[0:-12]
-file = os.path.join(foldername, 'tools.py')
+from pathlib import Path
+foldername = Path(bpy.context.space_data.text.filepath)
+file = os.path.join(foldername.parent.absolute(), 'tools.py')
 exec(compile(open(file).read(), file, 'exec'))
 
 
@@ -38,17 +38,6 @@ class MarblePod:
                 pod.select_set(True)
                 setMaterial(pod, makeMaterial('Red',(0.5,0,0,0.95),(1,1,1)))
                 return pod
-            
-            def makeMaterial(name, diffuse, specular):
-                mat = bpy.data.materials.new(name)
-                mat.diffuse_color = diffuse
-                mat.specular_color = specular
-                mat.specular_intensity = 0.5
-                return mat
-            
-            def setMaterial(ob, mat):
-                me = ob.data
-                me.materials.append(mat)
                 
             def makeHole(main, hole, holeMakerName):
                 bpy.ops.object.select_all(action='DESELECT')

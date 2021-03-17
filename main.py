@@ -5,6 +5,12 @@ import bpy
 from bpy import context as C 
 from bpy import data as D 
 from bpy import ops as O
+from pathlib import Path
+foldername = Path(bpy.context.space_data.text.filepath)
+file1 = os.path.join(foldername.parent.absolute(), 'path.py')
+exec(compile(open(file1).read(), file1, 'exec'))
+file2 = os.path.join(foldername.parent.absolute(), 'Car.py')
+exec(compile(open(file2).read(), file2, 'exec'))
 
 
 def clearMesh():

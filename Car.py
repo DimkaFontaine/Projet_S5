@@ -5,8 +5,13 @@ import bpy
 from bpy import context as C 
 from bpy import data as D 
 from bpy import ops as O
-bpy.context.space_data.text.filepath[0:-6]
-file = os.path.join(foldername, 'marblePod.py')
+from pathlib import Path
+foldername = Path(bpy.context.space_data.text.filepath)
+file = os.path.join(foldername.parent.absolute(), 'marblePod.py')
+exec(compile(open(file).read(), file, 'exec'))
+file = os.path.join(foldername.parent.absolute(), 'tools.py')
+exec(compile(open(file).read(), file, 'exec'))
+file = os.path.join(foldername.parent.absolute(), 'path.py')
 exec(compile(open(file).read(), file, 'exec'))
 
 
@@ -148,6 +153,8 @@ class Car:
         self.speed = 0.0
         self.turn = 0.0
         self.t = 1.0
+        self.currentState = 0
+        self.nextState = 0
 
     # MODELISATION
     def buildCar(self):
@@ -424,8 +431,51 @@ class Car:
             nbTic = (deltaWheels/(self.speed/24))
             deltaTurn = self.turn/nbTic
             self.body.rotation_euler[2] = self.body.rotation_euler[2]+deltaTurn
+            
+         def getAround(self):
+        print("get around")
+        
+    
+    #state 0 = begin
+    #      1 = tightL
+    def followLine(self):
+        lineDetector = self.detectLigne();
+        
+        if lineDetector == [0,0,0,0,0] and self.currentState == 0:
+            self.nextState = 3 
+        elif lineDetector == [0,0,0,0,0] and self.currentState == 1:
+            self.nextState = 6
+        elif lineDetector == [0,0,0,0,0] and self.currentState == 5:
+            nextState = 7
+        elif lineDetector[0] == 1:
+            self.nextState = 1
+        elif lineDetector[1] == 1:
+            self.nextState = 2
+        elif lineDetector[4] == 1: 
+            self.nextState = 5
+        elif lineDetector[3] == 1: 
+            self.nextState = 4
+        elif lineDetector[2] == 1:
+            self.nextState = 3
+        else:
+            self.nextState = self.currentState
+        
+        self.currentState = self.nextState
 
-
+        if self.currentState == 1:
+            self.setWheels(0)
+        elif self.currentState == 2:
+            self.setWheels(45)
+        elif self.currentState == 3:
+            self.setWheels(90)
+        elif self.currentState == 4:
+            self.setWheels(135)
+        elif self.currentState == 5:
+            self.setWheels(180)
+        elif self.currentState == 6:
+            print("panic gauche")
+        elif self.currentState == 7:
+            print("panic droite")
 
 #/////////////////////////////    Fonction Test   //////////////////////////////////////////////////////////
 
@@ -525,6 +575,36 @@ def testLines2(case, straight, curve):
         
     # Play
     O.screen.animation_play()
+    
+    def testStateMachine():
+    line = []
+    line.append(straightPath("1", scale_y = 0.5,loc_y = 0.1, loc_x = -0.3))
+    line[0].rotation_euler = (0,0,10)
+    bpy.ops.mesh.primitive_cube_add() 
+    C.active_object.name = "Obs" 
+    obs =C.active_object
+    obs.dimensions = (0.2, 0.2, 0.3)
+    obs.location = (-0.8,1.8,0.0)
+    car = Car(orientation = math.radians(90), rightLines = line, obstacles = [obs])
+    
+    car.setSpeed(50)
+    
+    frames = 300 
+    for i in range(frames): 
+    
+        C.scene.frame_set(i) 
+        car.update1in24frame() 
+        
+        distance= car.getSonar()
+        
+        if distance < 0.3:
+            car.setSpeed(0)
+            car.getAround()
+        else:
+            car.followLine()
+        
+    # Play
+    O.screen.animation_play()
 
 
 # //////////////////////////   RUN TEST   ///////////////////////////////////////////////
@@ -540,5 +620,6 @@ def testLines2(case, straight, curve):
 #testSpeedAndTurn()
 #testLines(1)
 #testLines(3)
+testStateMachine()
 
 #print("End")
