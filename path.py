@@ -9,6 +9,32 @@ foldername = bpy.context.space_data.text.filepath[0:-7]
 file = os.path.join(foldername, 'tools.py')
 exec(compile(open(file).read(), file, 'exec'))
 
+
+class curvePath:
+    def __init__(self,object,center,radius,angle,orientation):
+        self.object = object
+        self.center = center
+        self.centerWorld = [object.location[0] + center[0],object.location[1] + center[1]]
+        self.radius= radius
+        self.angle = angle
+        self.orientation = orientation
+        
+    def rotate(self,angle):
+        self.object.rotation_euler[2] = self.object.rotation_euler[2]+ angle
+        newCenter = [self.center[0]*math.cos(angle) -self.center[1]*math.sin(angle), self.center[0]*math.sin(angle) +self.center[1]*math.cos(angle)]
+        deplacement = [newCenter[0] - self.center[0],newCenter[1] - self.center[1]]
+        self.object.location[0] = self.object.location[0]-deplacement[0]
+        self.object.location[1] = self.object.location[1]-deplacement[1]
+        self.center = newCenter
+        self.centerWorld = [self.object.location[0] + self.center[0],self.object.location[1] + self.center[1]]
+        self.orientation = self.orientation + angle
+
+    def move(self,x,y):
+        self.object.location[0] = self.object.location[0]+x
+        self.object.location[1] = self.object.location[1]+y
+        self.centerWorld = [self.object.location[0] + self.center[0],self.object.location[1] + self.center[1]]
+
+
 def straightPath(name, scale_x = 0.009,scale_y = 0.009, loc_x =0, loc_y =0):
     O.mesh.primitive_plane_add()
     C.active_object.name = name
@@ -51,6 +77,8 @@ def turnPath(name, radius, angle, direction = 'L',loc_x =0, loc_y =0):
     #Rescle the cylinder to cut the outer radius 
     hole_maker.location = ((direction_factor*radius) + loc_x , loc_y, 0.0)
     
+    center = [hole_maker.location[0]-path.location[0],hole_maker.location[1]-path.location[1]]
+    
     makeHole(path, hole_maker)
     
     hole_maker = C.active_object
@@ -77,7 +105,9 @@ def turnPath(name, radius, angle, direction = 'L',loc_x =0, loc_y =0):
     angle_maker.rotation_euler = (0,0,math.radians(angle_offset-(angle*direction_factor)))
     makeHole(path, angle_maker, 'Angle maker')
     
-    return path
+    p = curvePath(path,center,radius, math.radians(angle),0)
+    
+    return p
     
 
 #test path creation functions  
@@ -120,9 +150,9 @@ def tightRightCurveTest():
     turnPath("rightTightTest", 0.12, 90, direction = 'R')
     
     
-print("Reset") 
+#print("Reset") 
 
-clearMesh()      # destroy all mesh object && reset animation too the start
-os.system("cls") # clean console
+#clearMesh()      # destroy all mesh object && reset animation too the start
+#os.system("cls") # clean console
 
-tightRightCurveTest()
+#tightRightCurveTest()
