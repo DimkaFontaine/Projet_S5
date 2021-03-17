@@ -4,11 +4,11 @@ import math
 import bpy 
 from bpy import context as C 
 from bpy import data as D 
-from bpy import ops as O
-foldername = bpy.context.space_data.text.filepath[0:-7]
-file = os.path.join(foldername, 'marblePod.py')
+from pathlib import Path
+foldername = Path(bpy.context.space_data.text.filepath)
+file = os.path.join(foldername.parent.absolute(), 'marblePod.py')
 exec(compile(open(file).read(), file, 'exec'))
-file = os.path.join(foldername, 'tools.py')
+file = os.path.join(foldername.parent.absolute(), 'tools.py')
 exec(compile(open(file).read(), file, 'exec'))
 
 
@@ -536,7 +536,7 @@ clearMesh()      # destroy all mesh object && reset animation too the start
 os.system("cls") # clean console 
 print("Start")
 
-#testModelisation()
+testModelisation()
 #testDetectionObstacle(0)
 #testDetectionObstacle(1)
 #testSpeedAndTurn()
