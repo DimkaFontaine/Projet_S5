@@ -125,5 +125,3 @@ print("Reset")
 
 clearMesh()      # destroy all mesh object && reset animation too the start
 os.system("cls") # clean console
-
-tightRightCurveTest()
