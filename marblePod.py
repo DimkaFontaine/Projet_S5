@@ -4,13 +4,13 @@ import bpy
 from bpy import context as C 
 from bpy import data as D 
 from bpy import ops as O
-foldername = bpy.context.space_data.text.filepath[0:-12]
+foldername = "C:\\Users\\Dimka\\Documents\\Uni\\S5\\projet\\repo"
 
 file = os.path.join(foldername, 'tools.py')
 exec(compile(open(file).read(), file, 'exec'))
 
 
-os.system("cls") # clean console 
+#os.system("cls") # clean console 
     
     
 class MarblePod:
@@ -93,13 +93,13 @@ class MarblePod:
             return p,m
          
          
-clearMesh()
-a = MarblePod()
+#clearMesh()
+#a = MarblePod()
 
-for i in range(120):
-    C.scene.frame_set(50+i)
-    a.pod.location[1] = a.pod.location[1] + 0.34/120.0
-    a.pod.keyframe_insert(data_path = 'location')
-    
-C.scene.frame_set(0)
-O.screen.animation_play()
+#for i in range(120):
+#    C.scene.frame_set(50+i)
+#    a.pod.location[1] = a.pod.location[1] + 0.34/120.0
+#    a.pod.keyframe_insert(data_path = 'location')
+#    
+#C.scene.frame_set(0)
+#O.screen.animation_play()
