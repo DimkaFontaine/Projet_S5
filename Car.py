@@ -153,7 +153,6 @@ class Car:
         self.speed = 0.0
         self.turn = 0.0
         self.t = 1.0
-        
         self.currentState = 0
         self.nextState = 0
 
@@ -432,8 +431,8 @@ class Car:
             nbTic = (deltaWheels/(self.speed/24))
             deltaTurn = self.turn/nbTic
             self.body.rotation_euler[2] = self.body.rotation_euler[2]+deltaTurn
-    
-    def getAround(self):
+            
+         def getAround(self):
         print("get around")
         
     
@@ -477,10 +476,6 @@ class Car:
             print("panic gauche")
         elif self.currentState == 7:
             print("panic droite")
-            
-            
-
-
 
 #/////////////////////////////    Fonction Test   //////////////////////////////////////////////////////////
 
@@ -581,7 +576,7 @@ def testLines2(case, straight, curve):
     # Play
     O.screen.animation_play()
     
-def testStateMachine():
+    def testStateMachine():
     line = []
     line.append(straightPath("1", scale_y = 0.5,loc_y = 0.1, loc_x = -0.3))
     line[0].rotation_euler = (0,0,10)
@@ -610,7 +605,6 @@ def testStateMachine():
         
     # Play
     O.screen.animation_play()
-    
 
 
 # //////////////////////////   RUN TEST   ///////////////////////////////////////////////
