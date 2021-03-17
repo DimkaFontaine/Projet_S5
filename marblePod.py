@@ -4,8 +4,8 @@ import bpy
 from bpy import context as C 
 from bpy import data as D 
 from bpy import ops as O
-foldername = "C:\\Users\\Dimka\\Documents\\Uni\\S5\\projet\\repo"
 
+bpy.context.space_data.text.filepath[0:-12]
 file = os.path.join(foldername, 'tools.py')
 exec(compile(open(file).read(), file, 'exec'))
 
