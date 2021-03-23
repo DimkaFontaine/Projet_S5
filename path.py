@@ -114,45 +114,88 @@ def turnPath(name, radius, angle, direction = 'L',loc_x =0, loc_y =0):
 #test path creation functions  
 
 def straightLineForwardTest():
-    straightPath("StraightLineForward", scale_y = 1, loc_y = 1)
+    curves = []
+    lines = []
+    obstacle = []
+    lines.append(straightPath("StraightLineForward", scale_y = 0.5, loc_y = 1))
+    lines[0].location[1] = 0.5
+    return lines, curves, obstacle
     
     
 def straightLineBackwardTest():
-    straightPath("StraightLineBackward", scale_y = 1, loc_y = 1)
+    curves = []
+    lines = []
+    obstacle = []
+    lines.append(straightPath("StraightLineForward", scale_y = 0.5, loc_y = 1))
+    lines[0].location[1] = -0.5
+    return lines, curves, obstacle
     
 def straightLineForwardWithObstacleTest():
-    straightPath("StraightLineForward", scale_y = 1, loc_y = 1)
-    O.mesh.primitive_cube_add() 
-    C.active_object.name = "Obstacle" 
-    lineToCarSupport =C.active_object
-    lineToCarSupport.scale = (0.01, 0.01, 0.5)
-    lineToCarSupport.location = (0,2,0)
+    curves = []
+    lines = []
+    obstacle = []
+    lines.append(straightPath("StraightLineForward", scale_y = 0.5, loc_y = 1))
+    lines[0].location[1] = 0.5
+    obstacle.append(buildObstacle())
+    obstacle[0].location = (0,1,0)
+    return lines, curves, obstacle
 
 def straightLineForwardWithObstacleInMiddleTest():
-    straightPath("StraightLineForward", scale_y = 1, loc_y = 1)
-    O.mesh.primitive_cube_add() 
-    C.active_object.name = "Obstacle" 
-    lineToCarSupport =C.active_object
-    lineToCarSupport.scale = (0.01, 0.01, 0.5)
-    lineToCarSupport.location = (0,1,0)
+    curves = []
+    lines = []
+    obstacle = []
+    lines.append(straightPath("StraightLineForward", scale_y = 1, loc_y = 0))
+    obstacle.append(buildObstacle())
+    obstacle[0].location = (0,1,0.1)
+    return lines, curves, obstacle
 
 def leftCurveTest():
-    turnPath("leftTest", 0.12, 90, direction = 'L')
-    
+    curves = []
+    lines = []
+    obstacle = []
+    curves.append(turnPath("leftTest", 0.36, 90, direction = 'L'))
+    return lines, curves, obstacle
 
 def rightCurveTest():
-    turnPath("rightTest", 0.5, 90, direction = 'R')
+    curves = []
+    lines = []
+    obstacle = []
+    curves.append(turnPath("leftTest", 0.36, 90, direction = 'L'))
+    curves[0].rotate(math.pi/2)
+    curves[0].move(0.72,0)
+    return lines, curves, obstacle
 
 def tightLeftCurveTest():
-    turnPath("leftTightTest", 0.12, 90, direction = 'L')
+    curves = []
+    lines = []
+    obstacle = []
+    curves.append(turnPath("leftTest", 0.12, 90, direction = 'L'))
+    curves.append(turnPath("leftTest", 0.12, 90, direction = 'L'))
+    curves[0].rotate(math.pi/2)
+    return lines, curves, obstacle
     
    
 def tightRightCurveTest():
-    turnPath("rightTightTest", 0.12, 90, direction = 'R')
-    
+    curves = []
+    lines = []
+    obstacle = []
+    curves.append(turnPath("leftTest", 0.12, 90, direction = 'L'))
+    curves.append(turnPath("leftTest", 0.12, 90, direction = 'L'))
+    curves[0].rotate(math.pi/2)
+    curves[0].move(0.24,0)
+    curves[1].move(0.24,0)
+    return lines, curves, obstacle
+
+def buildObstacle():
+    O.mesh.primitive_cube_add() 
+    C.active_object.name = "Obstacle" 
+    lineToCarSupport =C.active_object
+    lineToCarSupport.scale = (0.02, 0.02, 0.1)
+    return lineToCarSupport
     
 #print("Reset") 
 
-clearMesh()      # destroy all mesh object && reset animation too the start
-os.system("cls") # clean console
+#clearMesh()      # destroy all mesh object && reset animation too the start
+#os.system("cls") # clean console
 
+#straightLineForwardWithObstacleTest()
