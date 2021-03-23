@@ -5,10 +5,10 @@ from bpy import context as C
 from bpy import data as D 
 from bpy import ops as O
 
-#foldername = bpy.context.space_data.text.filepath[0:-12]
-foldername2 = "C:\\Users\\Dimka\\Documents\\Uni\\S5\\projet\\repo"
-filea = os.path.join(foldername2, 'tools.py')
-exec(compile(open(filea).read(), filea, 'exec'))
+from pathlib import Path
+foldername = Path(bpy.context.space_data.text.filepath)
+file = os.path.join(foldername.parent.absolute(), 'tools.py')
+exec(compile(open(file).read(), file, 'exec'))
 
 
 os.system("cls") # clean console 

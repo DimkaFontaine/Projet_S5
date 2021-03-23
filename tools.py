@@ -46,4 +46,15 @@ def makeIntersect(main, intersect, holeMakerName = ''):
         O.object.select_all(action='DESELECT')
         D.objects[holeMakerName].select_set(True)
         O.object.delete()
-    return                 
+    return     
+
+def makeMaterial(name, diffuse, specular):
+                mat = bpy.data.materials.new(name)
+                mat.diffuse_color = diffuse
+                mat.specular_color = specular
+                mat.specular_intensity = 0.5
+                return mat
+            
+def setMaterial(ob, mat):
+    me = ob.data
+    me.materials.append(mat)    

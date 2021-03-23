@@ -5,7 +5,7 @@ import bpy
 from bpy import context as C 
 from bpy import data as D 
 from bpy import ops as O
-
+from pathlib import Path
 
 def clearMesh():
     bpy.ops.screen.animation_cancel(restore_frame=True)
@@ -20,21 +20,16 @@ def clearMesh():
     bpy.ops.object.delete() 
     
 
-
-
-
-
-
-
 os.system("cls") # clean console
 print("Clean objecs...")
 clearMesh()      # destroy all mesh object && reset animation too the start
 
 print("Load files...")
-foldername =bpy.context.space_data.text.filepath[0:-7]
-file1 = os.path.join(foldername, 'path.py')
+
+foldername = Path(bpy.context.space_data.text.filepath)
+file1 = os.path.join(foldername.parent.absolute(), 'path.py')
 exec(compile(open(file1).read(), file1, 'exec'))
-file2 = os.path.join(foldername, 'Car.py')
+file2 = os.path.join(foldername.parent.absolute(), 'Car.py')
 exec(compile(open(file2).read(), file2, 'exec'))
 
 print("Build paths...")
@@ -55,7 +50,7 @@ lines, curves, obs = straightLineForwardTest()
 
 print("Build car...")
 car = Car(orientation = math.pi/2, rightLines = lines, curveLines = curves,obstacles = obs)
-car.body.location[1]= -0.12
+
 
 print("Compute car behavior...")
     

@@ -6,9 +6,15 @@ from bpy import context as C
 from bpy import data as D 
 from bpy import ops as O
 
-foldername1 = "C:\\Users\\Dimka\\Documents\\Uni\\S5\\projet\\repo"
-file1 = os.path.join(foldername1, 'marblePod.py')
-exec(compile(open(file1).read(), file1, 'exec'))
+from pathlib import Path
+foldername = Path(bpy.context.space_data.text.filepath)
+file = os.path.join(foldername.parent.absolute(), 'marblePod.py')
+exec(compile(open(file).read(), file, 'exec'))
+file = os.path.join(foldername.parent.absolute(), 'tools.py')
+exec(compile(open(file).read(), file, 'exec'))
+file = os.path.join(foldername.parent.absolute(), 'path.py')
+exec(compile(open(file).read(), file, 'exec'))
+
 
 
 def addVec3(a,b):
@@ -150,7 +156,9 @@ class Car:
         self.speed = 0.0
         self.turn = 0.0
         self.t = 1.0
-        
+        self.currentState = 0
+        self.nextState = 0
+            
     def init_rotate(self, angle):
         self.body.rotation_euler[2] = angle
         vec = [0.08*math.cos(angle),0.08*math.sin(angle)]
@@ -162,6 +170,7 @@ class Car:
         self.marblePod.pod.location[0] = self.body.location[0]+vec[0]
         self.marblePod.pod.location[1] = self.body.location[1]+vec[1]
         self.marblePod.pod.rotation_euler[2] = angle
+
 
     # MODELISATION
     def buildCar(self):
@@ -450,6 +459,53 @@ class Car:
 
 
 
+            
+    def getAround(self):
+        print("get around")
+        
+    
+    #state 0 = begin
+    #      1 = tightL
+    def followLine(self):
+        lineDetector = self.detectLigne();
+        
+        if lineDetector == [0,0,0,0,0] and self.currentState == 0:
+            self.nextState = 3 
+        elif lineDetector == [0,0,0,0,0] and self.currentState == 1:
+            self.nextState = 6
+        elif lineDetector == [0,0,0,0,0] and self.currentState == 5:
+            nextState = 7
+        elif lineDetector[0] == 1:
+            self.nextState = 1
+        elif lineDetector[1] == 1:
+            self.nextState = 2
+        elif lineDetector[4] == 1: 
+            self.nextState = 5
+        elif lineDetector[3] == 1: 
+            self.nextState = 4
+        elif lineDetector[2] == 1:
+            self.nextState = 3
+        else:
+            self.nextState = self.currentState
+        
+        self.currentState = self.nextState
+
+        if self.currentState == 1:
+            self.setWheels(0)
+        elif self.currentState == 2:
+            self.setWheels(45)
+        elif self.currentState == 3:
+            self.setWheels(90)
+        elif self.currentState == 4:
+            self.setWheels(135)
+        elif self.currentState == 5:
+            self.setWheels(180)
+        elif self.currentState == 6:
+            print("panic gauche")
+        elif self.currentState == 7:
+            print("panic droite")
+
+
 #/////////////////////////////    Fonction Test   //////////////////////////////////////////////////////////
 
 
@@ -568,6 +624,36 @@ def testLines2(case, straight, curve):
         
     # Play
     O.screen.animation_play()
+    
+    def testStateMachine():
+    line = []
+    line.append(straightPath("1", scale_y = 0.5,loc_y = 0.1, loc_x = -0.3))
+    line[0].rotation_euler = (0,0,10)
+    bpy.ops.mesh.primitive_cube_add() 
+    C.active_object.name = "Obs" 
+    obs =C.active_object
+    obs.dimensions = (0.2, 0.2, 0.3)
+    obs.location = (-0.8,1.8,0.0)
+    car = Car(orientation = math.radians(90), rightLines = line, obstacles = [obs])
+    
+    car.setSpeed(50)
+    
+    frames = 300 
+    for i in range(frames): 
+    
+        C.scene.frame_set(i) 
+        car.update1in24frame() 
+        
+        distance= car.getSonar()
+        
+        if distance < 0.3:
+            car.setSpeed(0)
+            car.getAround()
+        else:
+            car.followLine()
+        
+    # Play
+    O.screen.animation_play()
 
 
 # //////////////////////////   RUN TEST   ///////////////////////////////////////////////
@@ -580,9 +666,11 @@ print("Start")
 #testModelisation()
 #testDetectionObstacle(0)
 #testDetectionObstacle(1)
-testSpeedAndTurn()
+#testSpeedAndTurn()
 #testLines(1)
 #testLines(3)
 #testMarble()
+testStateMachine()
+
 
 print("End")
