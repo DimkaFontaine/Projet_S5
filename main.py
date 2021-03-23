@@ -21,6 +21,11 @@ def clearMesh():
     
 
 
+
+
+
+
+
 os.system("cls") # clean console
 print("Clean objecs...")
 clearMesh()      # destroy all mesh object && reset animation too the start
@@ -33,24 +38,24 @@ file2 = os.path.join(foldername, 'Car.py')
 exec(compile(open(file2).read(), file2, 'exec'))
 
 print("Build paths...")
-curves = []
 lines = []
+curves = []
+obs = []
 
-curves.append(turnPath("leftTest", 0.36, 90, direction = 'L'))
-curves.append(turnPath("leftTest", 0.36, 90, direction = 'L'))
+lines, curves, obs = straightLineForwardTest()
+#lines, curves, obs = straightLineBackwardTest()
+#lines, curves, obs = straightLineForwardWithObstacleTest()
+#lines, curves, obs = straightLineForwardWithObstacleInMiddleTest()
+#lines, curves, obs = leftCurveTest()
+#lines, curves, obs = rightCurveTest()
+#lines, curves, obs = tightLeftCurveTest()
+#lines, curves, obs = tightRightCurveTest()
 
-lines.append(straightPath("StraightLineForward", scale_y = 1, loc_y = 0))
-lines.append(straightPath("StraightLineForward", scale_y = 1, loc_y = 0))
 
-lines[1].location = (-0.72,3.72,0.0)
-
-curves[0].move(0.0,2)
-curves[1].move(0,2.72)
-curves[1].rotate(math.pi)
 
 print("Build car...")
-car = Car(orientation = math.pi/2, rightLines = lines, curveLines = curves)
-
+car = Car(orientation = math.pi/2, rightLines = lines, curveLines = curves,obstacles = obs)
+car.body.location[1]= -0.12
 
 print("Compute car behavior...")
     
@@ -61,9 +66,12 @@ car.setSpeed(50)
 
 for i in range(frames): 
     
-    C.scene.frame_set(i) 
+    C.scene.frame_set(i)  
     car.update1in24frame() 
     r = car.detectLigne()     
+    
+    if r[2]:
+        car.setWheels(90)
     if r[0]:
         car.setWheels(0)
     if r[4]:
@@ -72,5 +80,14 @@ for i in range(frames):
         car.setWheels(70)
     if r[3]:
         car.setWheels(110)
+    
+    if not r[0] and not r[1] and not r[2] and not r[3] and not r[4] :
+        car.setSpeed(0)
+        
+    if car.getSonar() < 0.1 :
+        car.setSpeed(0)
+        
 
+
+C.scene.frame_set(0) 
 print("Ready")

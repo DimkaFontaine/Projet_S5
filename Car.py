@@ -5,9 +5,10 @@ import bpy
 from bpy import context as C 
 from bpy import data as D 
 from bpy import ops as O
-bpy.context.space_data.text.filepath[0:-6]
-file = os.path.join(foldername, 'marblePod.py')
-exec(compile(open(file).read(), file, 'exec'))
+
+foldername1 = "C:\\Users\\Dimka\\Documents\\Uni\\S5\\projet\\repo"
+file1 = os.path.join(foldername1, 'marblePod.py')
+exec(compile(open(file1).read(), file1, 'exec'))
 
 
 def addVec3(a,b):
@@ -114,7 +115,7 @@ def distance3(vector):
 def distance2(vector):
     return pow((pow(abs(vector[0]),2)+pow(abs(vector[1]),2)),0.5)
 
-def rayCast2dObstacle(posInit, orientation, col, maxDistance = 3.0, precision = 0.001):
+def rayCast2dObstacle(posInit, orientation, col, maxDistance = 1.0, precision = 0.1):
 
     minDistancePossible = distance3(col.location) - distance3([col.scale[0],col.scale[1],0.0])
     rayStep = [0.0, 0.0, 0.0]
@@ -137,17 +138,30 @@ class Car:
 
     # INIT
     def __init__(self, location = (0.0,0.0), orientation = 0.0, obstacles = [], rightLines = [], curveLines = []):
+        self.marblePod = None
         self.body = self.buildCar();
         self.body.location[0] = location[0]
         self.body.location[1] = location[1]
         self.body.location[2] = 0.0675
-        self.body.rotation_euler[2] = orientation
+        self.init_rotate(orientation)
         self.obstacles = obstacles
         self.rightLines = rightLines
         self.curveLines = curveLines
         self.speed = 0.0
         self.turn = 0.0
         self.t = 1.0
+        
+    def init_rotate(self, angle):
+        self.body.rotation_euler[2] = angle
+        vec = [0.08*math.cos(angle),0.08*math.sin(angle)]
+        self.marblePod.initMove([self.body.location[0]+vec[0],self.body.location[1]+vec[1],0.0465+0.0675])
+        self.marblePod.pod.rotation_euler[2] = angle
+    
+    def rotatePod(self,angle):
+        vec = [0.08*math.cos(angle),0.08*math.sin(angle)]
+        self.marblePod.pod.location[0] = self.body.location[0]+vec[0]
+        self.marblePod.pod.location[1] = self.body.location[1]+vec[1]
+        self.marblePod.pod.rotation_euler[2] = angle
 
     # MODELISATION
     def buildCar(self):
@@ -265,6 +279,9 @@ class Car:
         lineSensor0.location = (0.1575,0.0375 ,-0.0475)
         
         
+        self.marblePod = MarblePod()
+            
+        
         # Parent object
         O.object.empty_add(type='SPHERE')
         C.active_object.name = "Car" 
@@ -272,6 +289,7 @@ class Car:
         car.scale = (0.0001, 0.0001, 0.0001)
         
         O.object.select_all(action='DESELECT')
+        
         
         body.select_set(True)
         lineSensor0.select_set(True)
@@ -294,7 +312,7 @@ class Car:
         
         O.object.parent_set(type='OBJECT')
         O.object.select_all(action='DESELECT')
-        
+                
         return car
     
 
@@ -389,15 +407,14 @@ class Car:
         
 
     def acceleration(self,speed, t=1):
-        d_V = -0.0109338794900686 + 0.093766057537244 * speed - 0.166404133282705 * (speed ** 2) + 0.133975259843262 * (speed ** 3)
-        return d_V * (t ** 2)
+        d_V = -0.109338794900686 + 0.93766057537244 * speed - 1.66404133282705 * (speed ** 2) + 1.33975259843262 * (speed ** 3)
+        return d_V * t
     
     def setSpeed(self, percent):
-#        self.speed = self.acceleration(percent)
+        p = percent/100.0
+        self.speed = self.acceleration(p)
         
-        #Temp 
-        self.speed = 0.0028 * percent - 0.0277
-        if percent <16:
+        if percent <16 and percent >-16:
             self.speed = 0.0
             
     def setWheels(self, deg):
@@ -406,17 +423,22 @@ class Car:
     def update1in24frame(self):
         self.updateRotate()
         self.updateLocation()
+        self.marblePod.updateMarbleFrame()
         self.setKeyframe()
         
     def setKeyframe(self):
         self.body.keyframe_insert(data_path = 'location')
         self.body.keyframe_insert(data_path = 'rotation_euler')
+        self.marblePod.pod.keyframe_insert(data_path = 'location')
+        self.marblePod.pod.keyframe_insert(data_path = 'rotation_euler')
         
     def updateLocation(self):
         x = self.speed*math.cos(self.body.rotation_euler[2])/24
         y = self.speed*math.sin(self.body.rotation_euler[2])/24
         self.body.location[0] = self.body.location[0] + x
         self.body.location[1] = self.body.location[1] + y
+        self.marblePod.pod.location[0] = self.marblePod.pod.location[0] + x
+        self.marblePod.pod.location[1] = self.marblePod.pod.location[1] + y
         
     def updateRotate(self):
         if self.speed > 0.0:
@@ -424,6 +446,7 @@ class Car:
             nbTic = (deltaWheels/(self.speed/24))
             deltaTurn = self.turn/nbTic
             self.body.rotation_euler[2] = self.body.rotation_euler[2]+deltaTurn
+            self.rotatePod(self.body.rotation_euler[2])
 
 
 
@@ -432,7 +455,7 @@ class Car:
 
 def testModelisation():
     car = Car()
-    marblePod = MarblePod(location = (0.085, 0, 0.1125))
+    
     
 def testDetectionObstacle(case):
     bpy.ops.mesh.primitive_cube_add() 
@@ -464,11 +487,12 @@ def testDetectionObstacle(case):
 
 def testSpeedAndTurn():
 
-    car = Car(orientation = math.pi*(1.0/2.0))
+    car = Car()
     
-    car.setSpeed(40)
+    car.setSpeed(60)
     
-    frames = 250 
+    frames = 350 
+    C.scene.frame_end = frames
     for i in range(frames): 
     
         C.scene.frame_set(i) 
@@ -477,13 +501,32 @@ def testSpeedAndTurn():
             car.setWheels(0)
         if i == 140:
             car.setWheels(90)
-            car.setSpeed(80)
+            car.setSpeed(30)
         if i == 180:
-            car.setSpeed(40)
+            car.setSpeed(50)
             car.setWheels(180)
         if i == 240:
             car.setSpeed(0)
     # Play
+    O.screen.animation_play() 
+    
+def testMarble():
+    car = Car(orientation = math.pi*(1.0/2.0))
+    car.setSpeed(0)
+    
+    frames = 250 
+    for i in range(frames): 
+        if i == 10:
+            car.setSpeed(60)
+        if i == 130:
+            car.setSpeed(0)
+        if i == 200:
+            car.setSpeed(65)
+        C.scene.frame_set(i) 
+        car.update1in24frame() 
+
+    # Play
+    C.scene.frame_set(0)
     O.screen.animation_play() 
 
 def testLines(case):
@@ -529,16 +572,17 @@ def testLines2(case, straight, curve):
 
 # //////////////////////////   RUN TEST   ///////////////////////////////////////////////
 
-#print("Reset") 
-#clearMesh()      # destroy all mesh object && reset animation too the start
-#os.system("cls") # clean console 
-#print("Start")
+print("Reset") 
+clearMesh()      # destroy all mesh object && reset animation too the start
+os.system("cls") # clean console 
+print("Start")
 
 #testModelisation()
 #testDetectionObstacle(0)
 #testDetectionObstacle(1)
-#testSpeedAndTurn()
+testSpeedAndTurn()
 #testLines(1)
 #testLines(3)
+#testMarble()
 
-#print("End")
+print("End")
