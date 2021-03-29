@@ -158,6 +158,7 @@ class Car:
         self.t = 1.0
         self.currentState = 0
         self.nextState = 0
+        self.keyframe = 0
             
     def init_rotate(self, angle):
         self.body.rotation_euler[2] = angle
@@ -450,7 +451,7 @@ class Car:
         self.marblePod.pod.location[1] = self.marblePod.pod.location[1] + y
         
     def updateRotate(self):
-        if self.speed > 0.0:
+        if self.speed != 0.0:
             deltaWheels = 0.145
             nbTic = (deltaWheels/(self.speed/24))
             deltaTurn = self.turn/nbTic
@@ -462,24 +463,49 @@ class Car:
             
     def getAround(self):
         print("get around")
-        
     
-    #state 0 = begin
-    #      1 = tightL
-    def followLine(self):
+    #state 
+    #0 = straight no line
+    #1 = tightL
+    #2 = Left
+    #3 = stright
+    #4 = right
+    #5 = tightR
+    #6 = panic Left detection
+    #7 = panic Left backward
+    #8 = panic Left forward
+    #9 = panic Right detection
+    #10 = panic Right backward
+    #11 = panic Right forward
+    #-1 = stop all
+    def followLine(self, frame):
         lineDetector = self.detectLigne();
-        
-        if lineDetector == [0,0,0,0,0] and self.currentState == 0:
-            self.nextState = 3 
+
+        if self.currentState == 6 and self.keyframe != frame:
+            self.nextState = 6
+        elif self.currentState == 6 and self.keyframe == frame:
+            self.nextState = 7
+        elif self.currentState == 7:
+            self.nextState = 8
+        elif self.currentState == 9 and self.keyframe != frame:
+            self.nextState = 9
+        elif self.currentState ==9 and self.keyframe == frame:
+            self.nextState = 10
+        elif self.currentState == 10:
+            self.nextState = 11
+        elif lineDetector == [1,1,1,1,1]:
+            self.nextState = -1
+        elif lineDetector == [0,0,0,0,0] and self.currentState == 0:
+            self.nextState = 0
         elif lineDetector == [0,0,0,0,0] and self.currentState == 1:
             self.nextState = 6
         elif lineDetector == [0,0,0,0,0] and self.currentState == 5:
-            nextState = 7
-        elif lineDetector[0] == 1:
+            self.nextState = 9
+        elif lineDetector[0] == 1 and self.currentState !=11:
             self.nextState = 1
         elif lineDetector[1] == 1:
             self.nextState = 2
-        elif lineDetector[4] == 1: 
+        elif lineDetector[4] == 1 and self.currentState !=8: 
             self.nextState = 5
         elif lineDetector[3] == 1: 
             self.nextState = 4
@@ -487,10 +513,16 @@ class Car:
             self.nextState = 3
         else:
             self.nextState = self.currentState
+            
+        print(lineDetector)
+        print(self.nextState)
         
         self.currentState = self.nextState
 
-        if self.currentState == 1:
+        if self.currentState == -1:
+            self.setSpeed(0)
+            print("Fin du trajet")
+        elif self.currentState == 1:
             self.setWheels(0)
         elif self.currentState == 2:
             self.setWheels(45)
@@ -500,11 +532,50 @@ class Car:
             self.setWheels(135)
         elif self.currentState == 5:
             self.setWheels(180)
+        #Panic left
         elif self.currentState == 6:
-            print("panic gauche")
-        elif self.currentState == 7:
-            print("panic droite")
+            if self.keyframe == 0:
+                self.keyframe = frame + 12
+                self.setWheels(180)
+                self.setSpeed(-30)
+        elif self.currentState == 8:
+            self.keyframe = 0
+            self.setSpeed(50)
+        elif self.currentState == 8 :
+            self.setWheels(40)
+        #Panic right
+        elif self.currentState == 9:
+            if self.keyframe == 0:
+                self.keyframe = frame + 12
+                self.setWheels(0)
+                self.setSpeed(-30)
+        elif self.currentState == 10 :
+            self.keyframe = 0
+            self.setSpeed(50)
+        elif self.currentState == 11:
+            self.setSpeed(50)
+            self.setWheels(140)
+    
+    def start(self):        
+            
+        self.setSpeed(50)
+        
+        frames = 500 
+        for i in range(frames): 
 
+            C.scene.frame_set(i) 
+            self.update1in24frame() 
+            
+            distance = self.getSonar()
+            
+            if distance < 0.3:
+                self.setSpeed(0)
+                self.getAround()
+            else:
+                self.followLine(i)
+            
+        # Play
+        O.screen.animation_play()
 
 #/////////////////////////////    Fonction Test   //////////////////////////////////////////////////////////
 
@@ -625,35 +696,20 @@ def testLines2(case, straight, curve):
     # Play
     O.screen.animation_play()
     
-    def testStateMachine():
+def testStateMachine():
+    curve = []
+    curve.append(turnPath("2", 0.12, 90, 'R', loc_y=1))
+    curve.append(turnPath("2", 0.12, 90, 'L', loc_x = 0.24, loc_y=1))
+    #curve.append(turnPath("2", 0.12, 90, 'R', loc_y=1, loc_x = -0.24))
+    #curve.append(turnPath("2", 0.12, 90, 'L', loc_y=1))
     line = []
-    line.append(straightPath("1", scale_y = 0.5,loc_y = 0.1, loc_x = -0.3))
-    line[0].rotation_euler = (0,0,10)
-    bpy.ops.mesh.primitive_cube_add() 
-    C.active_object.name = "Obs" 
-    obs =C.active_object
-    obs.dimensions = (0.2, 0.2, 0.3)
-    obs.location = (-0.8,1.8,0.0)
-    car = Car(orientation = math.radians(90), rightLines = line, obstacles = [obs])
+    line.append(straightPath("1", scale_y = 0.5))
+    #line.append(straightPath("1", scale_x = 0.5, loc_y = 1.12, loc_x = 0.12))
+    line.append(straightPath("1", scale_y = 0.5, loc_x = 0.24))
+    #line.append(straightPath("1", scale_y = 0.5, loc_x = -0.24))
     
-    car.setSpeed(50)
-    
-    frames = 300 
-    for i in range(frames): 
-    
-        C.scene.frame_set(i) 
-        car.update1in24frame() 
-        
-        distance= car.getSonar()
-        
-        if distance < 0.3:
-            car.setSpeed(0)
-            car.getAround()
-        else:
-            car.followLine()
-        
-    # Play
-    O.screen.animation_play()
+    car = Car(orientation = math.radians(90),curveLines = curve, rightLines = line)
+    car.start()
 
 
 # //////////////////////////   RUN TEST   ///////////////////////////////////////////////

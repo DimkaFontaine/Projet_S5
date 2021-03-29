@@ -55,12 +55,6 @@ def straightPath(name, scale_x = 0.009,scale_y = 0.009, loc_x =0, loc_y =0):
     #direction L = left
     #          R = right
 def turnPath(name, radius, angle, direction = 'L',loc_x =0, loc_y =0):
-    if direction == 'L':
-        direction_factor =-1
-        angle_offset= 270
-    else:
-        angle_offset= 90
-        direction_factor = 1
     
     #Create path plane
     O.mesh.primitive_plane_add()  
@@ -76,7 +70,7 @@ def turnPath(name, radius, angle, direction = 'L',loc_x =0, loc_y =0):
     hole_maker.scale = ((radius - 0.009), (radius - 0.009), 1.0) 
     
     #Rescle the cylinder to cut the outer radius 
-    hole_maker.location = ((direction_factor*radius) + loc_x , loc_y, 0.0)
+    hole_maker.location = ((-radius) + loc_x , loc_y, 0.0)
     
     center = [hole_maker.location[0]-path.location[0],hole_maker.location[1]-path.location[1]]
     
@@ -92,7 +86,7 @@ def turnPath(name, radius, angle, direction = 'L',loc_x =0, loc_y =0):
     C.active_object.name = "Angle maker" 
     angle_maker = C.active_object
     angle_maker.scale = ((radius+1), 2*radius, 1.0)
-    angle_maker.location = ((direction_factor*radius) + loc_x, loc_y , 0)
+    angle_maker.location = ((-radius) + loc_x, loc_y , 0)
     
     bpy.ops.mesh.primitive_cube_add() 
     C.active_object.name = "Hole maker2" 
@@ -103,10 +97,14 @@ def turnPath(name, radius, angle, direction = 'L',loc_x =0, loc_y =0):
     makeHole(angle_maker, hole_maker2, 'Hole maker2')
 
     #Rotate and cut
-    angle_maker.rotation_euler = (0,0,math.radians(angle_offset-(angle*direction_factor)))
+    angle_maker.rotation_euler = (0,0,math.radians(270+angle))
     makeHole(path, angle_maker, 'Angle maker')
     
     p = curvePath(path,center,radius, math.radians(angle),0)
+    
+    if direction == 'R':
+        p.rotate(math.radians(90))
+        p.move(2*radius,0)
     
     return p
     
