@@ -421,9 +421,11 @@ class Car:
         return d_V * t
     
     def setSpeed(self, percent):
-        p = percent/100.0
-        self.speed = self.acceleration(p)
-        
+        #p = percent/100.0
+        #self.speed = self.acceleration(p)
+       
+       #Temp 
+        self.speed = 0.0028 * percent - 0.0277
         if percent <16 and percent >-16:
             self.speed = 0.0
             
