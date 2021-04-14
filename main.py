@@ -7,71 +7,49 @@ from bpy import data as D
 from bpy import ops as O
 import tools as tools
 from pathlib import Path
-import path as path
-
-os.system("cls") # clean console
-print("Clean objecs...")
-tools.clearMesh()      # destroy all mesh object && reset animation too the start
-
-print("Load files...")
-
 foldername = Path(bpy.context.space_data.text.filepath)
 file1 = os.path.join(foldername.parent.absolute(), 'path.py')
 exec(compile(open(file1).read(), file1, 'exec'))
 file2 = os.path.join(foldername.parent.absolute(), 'Car.py')
 exec(compile(open(file2).read(), file2, 'exec'))
+file3 = os.path.join(foldername.parent.absolute(), 'tools.py')
+exec(compile(open(file2).read(), file3, 'exec'))
+
+os.system("cls") # clean console
+print("Clean objecs...")
+clearMesh()      # destroy all mesh object && reset animation too the start
 
 print("Build paths...")
-lines = []
 curves = []
-obs = []
+lines = []
 
-lines, curves, obs = path.straightLineForwardTest()
-#lines, curves, obs = straightLineBackwardTest()
-#lines, curves, obs = straightLineForwardWithObstacleTest()
-#lines, curves, obs = straightLineForwardWithObstacleInMiddleTest()
-#lines, curves, obs = leftCurveTest()
-#lines, curves, obs = rightCurveTest()
-#lines, curves, obs = tightLeftCurveTest()
-#lines, curves, obs = tightRightCurveTest()
+curves.append(turnPath("curve", 0.17, 90, 'R', loc_y = 1.83))
+curves.append(turnPath("curve", 0.17, 90, 'L', loc_x = 0.34, loc_y = 1.83))
+curves.append(turnPath("curve", 0.17, 90, 'R', loc_x = 0.34, loc_y = 0.17))
+curves[2].rotate(math.radians(90))
+curves.append(turnPath("curve", 0.17, 90, 'R', loc_x = 0.34, loc_y = 0.17))
+curves[3].rotate(math.radians(180))
+curves.append(turnPath("curve", 0.17, 90, 'R' , loc_x = 0.68, loc_y = 0.51))
+curves.append(turnPath("curve", 0.17, 90, 'R', loc_x = 1.32, loc_y = 0.85))
+curves[5].rotate(math.radians(180))
+curves.append(turnPath("curve", 0.17, 90, 'R', loc_x = 1.66, loc_y = 0.85))
+curves.append(turnPath("curve", 0.17, 90, 'R', loc_x = 1.66, loc_y = 1.19))
+curves[7].rotate(math.radians(180))
+curves.append(turnPath("curve", 0.17, 90, 'L', loc_x = 2.00, loc_y = 1.49))
 
-
+lines.append(straightPath("line", scale_y = 0.915))
+lines.append(straightPath("line", scale_y = 0.830, loc_x = 0.34,loc_y = 0.17))
+lines.append(straightPath("line", scale_y = 0.17, loc_x = 0.68, loc_y = 0.17))
+lines.append(straightPath("line", scale_x = 0.32, loc_x = 0.85, loc_y = 0.68))
+lines.append(straightPath("line", scale_y = 0.15, loc_x = 2,loc_y = 1.19))
+lines.append(straightPath("line", scale_x = 0.575, loc_x = 0.68,loc_y = 1.66))
+lines.append(straightPath("line", scale_y = 0.1, loc_x = 0.68,loc_y = 1.56))
 
 print("Build car...")
-car = Car(orientation = math.pi/2, rightLines = lines, curveLines = curves,obstacles = obs)
-
+car = Car(orientation = math.pi/2, rightLines = lines, curveLines = curves)
 
 print("Compute car behavior...")
-    
-frames = 800
-C.scene.frame_end = frames
 
-car.setSpeed(50)
+car.start()
 
-for i in range(frames): 
-    
-    C.scene.frame_set(i)  
-    car.update1in24frame() 
-    r = car.detectLigne()     
-    
-    if r[2]:
-        car.setWheels(90)
-    if r[0]:
-        car.setWheels(0)
-    if r[4]:
-        car.setWheels(180)
-    if r[1]:
-        car.setWheels(70)
-    if r[3]:
-        car.setWheels(110)
-    
-    if not r[0] and not r[1] and not r[2] and not r[3] and not r[4] :
-        car.setSpeed(0)
-        
-    if car.getSonar() < 0.1 :
-        car.setSpeed(0)
-        
-
-
-C.scene.frame_set(0) 
 print("Ready")

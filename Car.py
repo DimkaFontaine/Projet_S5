@@ -507,30 +507,6 @@ class Car:
     def followLine(self, frame):
         lineDetector = self.detectLigne()
         distance = self.getSonar()
-        
-        
-#        if distance < 0.1 or (self.currentState == 12 and self.keyframe != frame) :
-#            self.nextState = 12
-#        elif self.currentState == 12 and self.keyframe == frame:
-#            self.nextState = 13
-#        elif self.currentState == 13 :
-#            self.nextState = 14
-#        elif self.currentState == 14 and self.keyframe != frame:
-#            self.nextState = 14
-#        elif self.currentState == 14 and self.keyframe == frame:
-#            self.nextState = 15
-#        elif self.currentState == 6 and self.keyframe != frame:
-#            self.nextState = 6
-#        elif self.currentState == 6 and self.keyframe == frame:
-#            self.nextState = 7
-#        elif self.currentState == 7:
-#            self.nextState = 8
-#        elif self.currentState == 9 and self.keyframe != frame:
-#            self.nextState = 9
-#        elif self.currentState ==9 and self.keyframe == frame:
-#            self.nextState = 10
-#        elif self.currentState == 10:
-#            self.nextState = 11
             
         if distance < 0.1 :
             self.nextState = 10
@@ -600,54 +576,12 @@ class Car:
         elif self.currentState == 11: 
             self.setSpeed(50)
             self.setWheels(180)
-
-
-        #Panic left
-#        elif self.currentState == 6:
-#            if self.keyframe == 0:
-#                self.keyframe = frame + 12
-#                self.setWheels(180)
-#                self.setSpeed(-30)
-#        elif self.currentState == 8:
-#            self.keyframe = 0
-#            self.setSpeed(50)
-#        elif self.currentState == 8 :
-#            self.setWheels(40)
-#            self.setSpeed(50)
-#        #Panic right
-#        elif self.currentState == 9:
-#            if self.keyframe == 0:
-#                self.keyframe = frame + 12
-#                self.setWheels(0)
-#                self.setSpeed(-30)
-#        elif self.currentState == 10 :
-#            self.keyframe = 0
-#            self.setSpeed(50)
-#        elif self.currentState == 11:
-#            self.setSpeed(50)
-#            self.setWheels(140)
-#        #obstacle avoidance
-#        elif self.currentState == 12:
-#            if self.keyframe == 0:
-#                self.keyframe = frame + 12
-#                self.setSpeed(-30)
-#        elif self.currentState == 13:
-#            self.keyframe = frame + 24
-#            self.setSpeed(50)
-#            self.setWheels(30)
-#        elif self.currentState == 14 :
-#            self.setSpeed(50)
-#            self.setWheels(30)
-#        elif self.currentState == 15 :
-#            self.keyframe = 0
-#            self.setSpeed(50)
-#            self.setWheels(180)
     
     def start(self):        
             
         self.setSpeed(50)
         
-        frames = 500 
+        frames = 5000 
         for i in range(frames): 
 
             C.scene.frame_set(i) 
@@ -813,7 +747,7 @@ print("Start")
 #testLines(1)
 #testLines(3)
 #testMarble()
-testStateMachine()
+#testStateMachine()
 
 
 print("End")
