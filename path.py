@@ -10,7 +10,16 @@ foldername = Path(bpy.context.space_data.text.filepath)
 file = os.path.join(foldername.parent.absolute(), 'tools.py')
 exec(compile(open(file).read(), file, 'exec'))
 
-
+# curvePath
+#   -description:
+#       Permet d'initialiser un parcour courbé
+#   -param:
+#       -Object: Objet sur lequel le parcour sera centré
+#       -Center: Position de centre initiale
+#       -Radius: Rayon de la courbe du parcours
+#       -Angle:  Angle de rotation par rapport à Object
+#       -Orientation: Orientation initiale du parcours courbé
+#   -return: curvePath
 class curvePath:
     def __init__(self,object,center,radius,angle,orientation):
         self.object = object
@@ -36,6 +45,16 @@ class curvePath:
         self.centerWorld = [self.object.location[0] + self.center[0],self.object.location[1] + self.center[1]]
 
 
+# straightPath()
+#   -description:
+#       Permet d'initialiser un parcours en ligne droite dans Blender
+#   -param:
+#       -name: Nom du parcours qui sera créé
+#       -scale_x: Grandeur en x du parcours
+#       -scale_y: Grandeur en y du parcours
+#       -loc_x:  location en x du parcours
+#       -loc_y: location en y du parcours
+#   -return: straightPath
 def straightPath(name, scale_x = 0.009,scale_y = 0.009, loc_x =0, loc_y =0):
     O.mesh.primitive_plane_add()
     C.active_object.name = name
@@ -54,6 +73,18 @@ def straightPath(name, scale_x = 0.009,scale_y = 0.009, loc_x =0, loc_y =0):
     
     #direction L = left
     #          R = right
+
+# turnPath()
+#   -description:
+#       Permet d'instancier le parcours courbé dans Blender
+#   -param:
+#       -name: Nom du parcours qui sera créé
+#       -radius: Rayon du parcours courbé
+#       -angle: Angle du parcours
+#       -direction:  Direction du parcours
+#       -loc_x: location en x du parcours à instancier
+#       -loc_y: location en y du parcours à instancier
+#   -return: path
 def turnPath(name, radius, angle, direction = 'L',loc_x =0, loc_y =0):
     
     #Create path plane
@@ -111,6 +142,14 @@ def turnPath(name, radius, angle, direction = 'L',loc_x =0, loc_y =0):
 
 #test path creation functions  
 
+# straightLineForwardTest()
+#   -description:
+#       Test pour une ligne droite. Le véhicule avance
+#   -param: NONE
+#   -return:
+#       [0]: lines
+#       [1]: curves
+#       [2]: obstacle
 def straightLineForwardTest():
     curves = []
     lines = []
@@ -119,7 +158,14 @@ def straightLineForwardTest():
     lines[0].location[1] = 0.5
     return lines, curves, obstacle
     
-    
+# straightLineForwardTest()
+#   -description:
+#       Test pour une ligne droite. Le véhicule recule
+#   -param: NONE
+#   -return:
+#       [0]: lines
+#       [1]: curves
+#       [2]: obstacle
 def straightLineBackwardTest():
     curves = []
     lines = []

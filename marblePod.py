@@ -13,7 +13,12 @@ exec(compile(open(file).read(), file, 'exec'))
 
 os.system("cls") # clean console 
     
-    
+# MarblePod
+#   -description:
+#       Permet d'instancier la nacelle de la bille avec les propriété physiques nécessaire à la simulation
+#   -param:
+#       -location: Coordonnés initiales (x,y,z)
+#   -return: MerblePod
 class MarblePod:
         def __init__(self, location = (0.0,0.0,0.0)):
             self.location = location

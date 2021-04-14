@@ -5,24 +5,13 @@ import bpy
 from bpy import context as C 
 from bpy import data as D 
 from bpy import ops as O
+import tools as tools
 from pathlib import Path
-
-def clearMesh():
-    bpy.ops.screen.animation_cancel(restore_frame=True)
-    O.object.select_all(action='DESELECT')
-    for o in bpy.context.scene.objects: 
-        if o.type == 'MESH': 
-            o.select_set(True) 
-        elif o.name == 'Car':
-            o.select_set(True)
-        else: 
-            o.select_set(False)
-    bpy.ops.object.delete() 
-    
+import path as path
 
 os.system("cls") # clean console
 print("Clean objecs...")
-clearMesh()      # destroy all mesh object && reset animation too the start
+tools.clearMesh()      # destroy all mesh object && reset animation too the start
 
 print("Load files...")
 
@@ -37,7 +26,7 @@ lines = []
 curves = []
 obs = []
 
-lines, curves, obs = straightLineForwardTest()
+lines, curves, obs = path.straightLineForwardTest()
 #lines, curves, obs = straightLineBackwardTest()
 #lines, curves, obs = straightLineForwardWithObstacleTest()
 #lines, curves, obs = straightLineForwardWithObstacleInMiddleTest()
