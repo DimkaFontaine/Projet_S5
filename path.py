@@ -173,7 +173,15 @@ def straightLineBackwardTest():
     lines.append(straightPath("StraightLineForward", scale_y = 0.5, loc_y = 1))
     lines[0].location[1] = -0.5
     return lines, curves, obstacle
-    
+
+# straightLineForwardWithObstacleTest()
+#   -description:
+#       Test pour une ligne droite avec un obstacle. Le véhicule avance.
+#   -param: NONE
+#   -return:
+#       [0]: lines
+#       [1]: curves
+#       [2]: obstacle
 def straightLineForwardWithObstacleTest():
     curves = []
     lines = []
@@ -184,6 +192,14 @@ def straightLineForwardWithObstacleTest():
     obstacle[0].location = (0,1,0)
     return lines, curves, obstacle
 
+# straightLineForwardWithObstacleInMiddleTest()
+#   -description:
+#       Test pour une ligne droite avec un obstacle au milieu de la ligne. Le véhicule avance.
+#   -param: NONE
+#   -return:
+#       [0]: lines
+#       [1]: curves
+#       [2]: obstacle
 def straightLineForwardWithObstacleInMiddleTest():
     curves = []
     lines = []
@@ -193,6 +209,14 @@ def straightLineForwardWithObstacleInMiddleTest():
     obstacle[0].location = (0,1,0.1)
     return lines, curves, obstacle
 
+# leftCurveTest()
+#   -description:
+#       Test pour une courbe à gauche.
+#   -param: NONE
+#   -return:
+#       [0]: lines
+#       [1]: curves
+#       [2]: obstacle
 def leftCurveTest():
     curves = []
     lines = []
@@ -200,6 +224,14 @@ def leftCurveTest():
     curves.append(turnPath("leftTest", 0.36, 90, direction = 'L'))
     return lines, curves, obstacle
 
+#  rightCurveTest()
+#   -description:
+#       Test pour une courbe à gauche.
+#   -param: NONE
+#   -return:
+#       [0]: lines
+#       [1]: curves
+#       [2]: obstacle
 def rightCurveTest():
     curves = []
     lines = []
@@ -209,6 +241,14 @@ def rightCurveTest():
     curves[0].move(0.72,0)
     return lines, curves, obstacle
 
+#  tightLeftCurveTest()
+#   -description:
+#       Test pour une courbe serrée à gauche.
+#   -param: NONE
+#   -return:
+#       [0]: lines
+#       [1]: curves
+#       [2]: obstacle
 def tightLeftCurveTest():
     curves = []
     lines = []
@@ -218,7 +258,14 @@ def tightLeftCurveTest():
     curves[0].rotate(math.pi/2)
     return lines, curves, obstacle
     
-   
+#  tightRightCurveTest()
+#   -description:
+#       Test pour une courbe serrée à droite.
+#   -param: NONE
+#   -return:
+#       [0]: lines
+#       [1]: curves
+#       [2]: obstacle
 def tightRightCurveTest():
     curves = []
     lines = []
@@ -230,6 +277,12 @@ def tightRightCurveTest():
     curves[1].move(0.24,0)
     return lines, curves, obstacle
 
+#  buildObstacle()
+#   -description:
+#       Construit un obstacle.
+#   -param: NONE
+#   -return:
+#       [0]: lineToCarSupport
 def buildObstacle():
     O.mesh.primitive_cube_add() 
     C.active_object.name = "Obstacle" 
