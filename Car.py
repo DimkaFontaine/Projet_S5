@@ -160,6 +160,10 @@ class Car:
         self.nextState = 0
         self.keyframe = 0
         self.keyframe2 = 0
+        self.keyframe3 = 0
+        self.keyframe4 = 0
+        self.keyframe5 = 0
+        self.keyframe6 = 0
             
     def init_rotate(self, angle):
         self.body.rotation_euler[2] = angle
@@ -463,30 +467,52 @@ class Car:
 
 
     def panicTurn(self, frame, direction):
-        if self.keyframe == 0:
-            self.keyframe = frame + 12
-            self.setWheels(0 if direction == 'R' else 180)
-            self.setSpeed(-30)
-
+        if self.keyframe == 0 :
+            self.keyframe = frame + 30
         if frame == self.keyframe:
+            self.keyframe2 = frame + 20
+            self.setWheels(0 if direction == 'R' else 180)
+            self.setSpeed(-20)
+        if frame == self.keyframe2: 
+            self.setSpeed(0)
+            self.keyframe3 = frame + 12
+        if frame == self.keyframe3:
             self.keyframe = 0
+            self.keyframe2 = 0
+            self.keyframe3 = 0
             self.currentState = 7 if direction == 'R' else 9
             self.setSpeed(50)
             
     def getAround(self, frame):
         if self.keyframe == 0:
-            self.keyframe = frame + 12
-            self.setWheels(90)
-            self.setSpeed(-30)
-
+            self.keyframe = frame + 120
+            self.setSpeed(0)
         if frame == self.keyframe:
             self.keyframe2 = frame + 48
-            self.setSpeed(50)
-            self.setWheels(30)
-            
+            self.setWheels(90)
+            self.setSpeed(-30)
         if frame == self.keyframe2:
-            self.keyframe = 0
+            self.keyframe3 = frame + 24
+            self.setSpeed(0)
+        if frame == self.keyframe3:
+            self.keyframe4 = frame + 68
+            self.setWheels(60)
+            self.setSpeed(50)
+        if frame == self.keyframe4:
+            self.keyframe5 = frame + 24
+            self.setSpeed(50)
+            self.setWheels(105)
+        if frame == self.keyframe5:
+            self.keyframe6 = frame + 12
+            self.setSpeed(50)
+            self.setWheels(135)
+        if frame == self.keyframe6:
+            self.keyframe6 = 0
+            self.keyframe5 = 0
+            self.keyframe4 = 0
+            self.keyframe3 = 0
             self.keyframe2 = 0
+            self.keyframe = 0
             self.setSpeed(50)
             self.setWheels(180)
             self.currentState = 11
@@ -508,15 +534,15 @@ class Car:
         lineDetector = self.detectLigne()
         distance = self.getSonar()
             
-        if distance < 0.1 :
+        if self.currentState == 10:
             self.nextState = 10
-        elif self.currentState == 10:
-            self.currentState = 10
         elif self.currentState == 6:
             self.nextState = 6
         elif self.currentState == 8:
             self.nextState = 8    
-        elif lineDetector == [1,1,1,1,1]:
+        elif distance < 0.1 :
+            self.nextState = 10
+        elif lineDetector == [1,1,1,1,1] or lineDetector == [0,1,1,1,1] or lineDetector == [1,1,1,1,0]:
             self.nextState = -1
         elif lineDetector == [0,0,0,0,0] and self.currentState == 0:
             self.nextState = 0
@@ -548,29 +574,29 @@ class Car:
             print("Fin du trajet")
         elif self.currentState == 1:
             self.setWheels(0)
-            self.setSpeed(50)
+            self.setSpeed(30)
         elif self.currentState == 2:
-            self.setWheels(45)
-            self.setSpeed(50)
+            self.setWheels(70)
+            self.setSpeed(40)
         elif self.currentState == 3:
             self.setWheels(90)
             self.setSpeed(50)
         elif self.currentState == 4:
-            self.setWheels(135)
-            self.setSpeed(50)
+            self.setWheels(110)
+            self.setSpeed(40)
         elif self.currentState == 5:
             self.setWheels(180)
-            self.setSpeed(50)
+            self.setSpeed(30)
         elif self.currentState == 6:
             self.panicTurn(frame, 'L')
         elif self.currentState == 7:
-            self.setSpeed(50)
-            self.setWheels(140)
+            self.setSpeed(30)
+            self.setWheels(80)
         elif self.currentState == 8:
             self.panicTurn(frame, 'R')
         elif self.currentState == 9:
-            self.setSpeed(50)
-            self.setWheels(40)
+            self.setSpeed(30)
+            self.setWheels(100)
         elif self.currentState == 10: 
             self.getAround(frame)
         elif self.currentState == 11: 
@@ -581,7 +607,7 @@ class Car:
             
         self.setSpeed(50)
         
-        frames = 5000 
+        frames = 4000
         for i in range(frames): 
 
             C.scene.frame_set(i) 
