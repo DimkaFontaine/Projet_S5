@@ -139,6 +139,18 @@ def turnPath(name, radius, angle, direction = 'L',loc_x =0, loc_y =0):
     
     return p
     
+#  buildObstacle()
+#   -description:
+#       Construit un obstacle.
+#   -param: NONE
+#   -return:
+#       [0]: lineToCarSupport
+def buildObstacle():
+    O.mesh.primitive_cube_add() 
+    C.active_object.name = "Obstacle" 
+    obs =C.active_object
+    obs.dimensions = (0.075, 0.064, 0.115)
+    return obs
 
 #test path creation functions  
 
@@ -277,22 +289,6 @@ def tightRightCurveTest():
     curves[1].move(0.24,0)
     return lines, curves, obstacle
 
-#  buildObstacle()
-#   -description:
-#       Construit un obstacle.
-#   -param: NONE
-#   -return:
-#       [0]: lineToCarSupport
-def buildObstacle():
-    O.mesh.primitive_cube_add() 
-    C.active_object.name = "Obstacle" 
-    lineToCarSupport =C.active_object
-    lineToCarSupport.scale = (0.02, 0.02, 0.1)
-    return lineToCarSupport
+
     
-#print("Reset") 
 
-#clearMesh()      # destroy all mesh object && reset animation too the start
-#os.system("cls") # clean console
-
-#straightLineForwardWithObstacleTest()
