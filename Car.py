@@ -16,129 +16,6 @@ file = os.path.join(foldername.parent.absolute(), 'path.py')
 exec(compile(open(file).read(), file, 'exec'))
 
 
-
-def addVec3(a,b):
-    c = [0.0,0.0,0.0]
-    c[0] = a[0] + b[0]
-    c[1] = a[1] + b[1]
-    c[2] = a[2] + b[2] 
-    return c
-
-def minusVec3(a,b):
-    c = [0.0,0.0,0.0]
-    c[0] = a[0] - b[0]
-    c[1] = a[1] - b[1]
-    c[2] = a[2] - b[2] 
-    return c
-
-def minusVec2(a,b):
-    c = [0.0,0.0]
-    c[0] = a[0] - b[0]
-    c[1] = a[1] - b[1] 
-    return c
-        
-def multVec3(a,b):
-    c = [0.0,0.0,0.0]
-    c[0] = a[0] * b[0]
-    c[1] = a[1] * b[1]
-    c[2] = a[2] * b[2] 
-    return c
-
-def multVec2(a,b):
-    c = [0.0,0.0]
-    c[0] = a[0] * b[0]
-    c[1] = a[1] * b[1] 
-    return c
-
-def prodScalarVec3(a,b):
-    c = multVec3(a,b)
-    return c[0]+ c[1] + c[2]
-
-def prodScalarVec2(a,b):
-    c = multVec2([a[0],a[1],0.0],b)
-    return c[0]+ c[1]
-
-
-
-def rectCornerToWorld(col):
-    a =  [col.scale[0]*math.cos(col.rotation_euler[2]) - col.scale[1]*math.sin(col.rotation_euler[2]), col.scale[0]*math.sin(col.rotation_euler[2]) + col.scale[1]*math.cos(col.rotation_euler[2])]
-    b =  [col.scale[0]*math.cos(col.rotation_euler[2]) - (-col.scale[1])*math.sin(col.rotation_euler[2]), col.scale[0]*math.sin(col.rotation_euler[2]) + (-col.scale[1])*math.cos(col.rotation_euler[2])]    
-    c = [(-col.scale[0])*math.cos(col.rotation_euler[2]) - (-col.scale[1])*math.sin(col.rotation_euler[2]), (-col.scale[0])*math.sin(col.rotation_euler[2]) + (-col.scale[1])*math.cos(col.rotation_euler[2])]
-    d =  [(-col.scale[0])*math.cos(col.rotation_euler[2]) - col.scale[1]*math.sin(col.rotation_euler[2]), (-col.scale[0])*math.sin(col.rotation_euler[2]) + col.scale[1]*math.cos(col.rotation_euler[2])]
-
-    a = [col.location[0]+a[0], col.location[1]+a[1]]
-    b = [col.location[0]+b[0], col.location[1]+b[1]]
-    c = [col.location[0]+c[0], col.location[1]+c[1]]
-    d = [col.location[0]+d[0], col.location[1]+d[1]]
-    
-    return a,b,c,d
-
-
-
-def pointInRect(p, rect):
-    
-    a,b,c,d = rectCornerToWorld(rect)
-    
-    vecAB = minusVec2(b,a)
-    vecAD = minusVec2(d,a)
-    vecAP = minusVec2(p,a)
-    
-    vecCB = minusVec2(b,c)
-    vecCD = minusVec2(d,c)
-    vecCP = minusVec2(p,c)
-    
-    return prodScalarVec2(vecCP,vecCB) > 0 and prodScalarVec2(vecCP,vecCD) > 0 and prodScalarVec2(vecAP,vecAB) > 0 and prodScalarVec2(vecAP,vecAD) > 0
-    
-
-def pointInCurve(p, curve, demiLargeur = 0.009):
-    
-    c = curve.centerWorld
-    r = curve.radius
-    a0 = curve.orientation
-    a1 =  a0 + curve.angle
-    
-    vec = minusVec2(p,c)
-    distance = distance2(vec)
-    angle = math.atan(abs(vec[1])/abs(vec[0]))
-
-    if vec[0] < 0:
-        if vec[1] < 0:
-            angle = angle + math.pi
-        else:
-            angle = math.pi - angle
-    else:
-         if vec[1] < 0:
-            angle = (2*math.pi) - angle
-    
-    return distance < r+demiLargeur and distance > r-demiLargeur and angle > a0 and angle < a1
-
-
-
-
-def distance3(vector):
-    return pow((pow(abs(vector[0]),2)+pow(abs(vector[1]),2))+pow(abs(vector[2]),2),0.5)
-
-def distance2(vector):
-    return pow((pow(abs(vector[0]),2)+pow(abs(vector[1]),2)),0.5)
-
-def rayCast2dObstacle(posInit, orientation, col, maxDistance = 1.0, precision = 0.1):
-
-    minDistancePossible = distance3(col.location) - distance3([col.scale[0],col.scale[1],0.0])
-    rayStep = [0.0, 0.0, 0.0]
-    for i in range(3):
-        rayStep[i] = orientation[i]*precision
-    ray = [0.0, 0.0, 0.0]
-    
-    while distance3(ray) < maxDistance :
-        ray = addVec3(ray,rayStep)
-        pos  = addVec3(posInit,ray)
-        if distance3(pos) > minDistancePossible :
-            if pointInRect(pos,col):
-                return [True, pos]
-    return [False, [0.0,0.0,0.0]]
-
-
-
 class Car:
 
 
@@ -171,6 +48,7 @@ class Car:
         self.marblePod.initMove([self.body.location[0]+vec[0],self.body.location[1]+vec[1],0.0465+0.0675])
         self.marblePod.pod.rotation_euler[2] = angle
     
+    # tourne le pod pour qu'il suit le véhicule
     def rotatePod(self,angle):
         vec = [0.08*math.cos(angle),0.08*math.sin(angle)]
         self.marblePod.pod.location[0] = self.body.location[0]+vec[0]
@@ -333,8 +211,10 @@ class Car:
 
     # Sensors ------------------------------------------------------
     
+    # trouve la distance détecter par le capteur sonar
     def sensorFeedback(self, sensorPosition, orientation, colliders): 
         for col in colliders: 
+            #raycast dans tools.py
             results = rayCast2dObstacle(sensorPosition, orientation, col) 
             if results[0]: 
                 if False:
@@ -347,7 +227,7 @@ class Car:
                 return [col.name,d] 
         return [None,50.0]
     
-    
+    # position dans le monde d'une piece du véhicule
     def localToWorldLocation(self, carPart):
         currentRad = self.body.rotation_euler[2]
         localX =  carPart.location[0]*math.cos(currentRad) - carPart.location[1]*math.sin(currentRad)
@@ -360,7 +240,7 @@ class Car:
 
         
     
-    
+    # simule les capteurs de distance
     def getSonar(self):
         
         soundR = self.localToWorldLocation(C.scene.objects['SoundSensorR'])
@@ -382,7 +262,7 @@ class Car:
         results.sort(key = sortFunc)
         return results[0][1]
     
-    
+    #simule les capteurs de ligne
     def detectLigne(self):
         s0 = self.localToWorldLocation(C.scene.objects['LineSensor0'])
         s1 = self.localToWorldLocation(C.scene.objects['LineSensor1'])
@@ -409,14 +289,17 @@ class Car:
     
     # Movement ------------------------------------------------------------
     
+    #changer vitesse
     def setSpeed(self, percent):
         self.speed = 0.0028 * percent - 0.0277
         if percent <16 and percent >-16:
             self.speed = 0.0
-            
+    
+    #changer l'angle des roues
     def setWheels(self, deg):
         self.turn = (-(deg - 90)* math.pi)/360
         
+    # mettre à jour la position du véhicule, de la bille & ajouter les keyframes
     def update1in24frame(self):
         self.updateRotate()
         self.updateLocation()
@@ -445,7 +328,7 @@ class Car:
             self.body.rotation_euler[2] = self.body.rotation_euler[2]+deltaTurn
             self.rotatePod(self.body.rotation_euler[2])
 
-
+    # Courbe serré
     def panicTurn(self, frame, direction):
         if self.keyframe == 0 :
             self.keyframe = frame + 30
@@ -463,6 +346,7 @@ class Car:
             self.currentState = 7 if direction == 'R' else 9
             self.setSpeed(50)
             
+    # Évitement d'obstacle
     def getAround(self, frame):
         if self.keyframe == 0:
             self.keyframe = frame + 120
@@ -496,20 +380,8 @@ class Car:
             self.setSpeed(50)
             self.setWheels(180)
             self.currentState = 11
-    
-    #state 
-    #0 = straight no line
-    #1 = tightL
-    #2 = Left
-    #3 = stright
-    #4 = right
-    #5 = tightR
-    #6 = panic Left backward
-    #7 = panic Left forward
-    #8 = panic Right backward
-    #9 = panic Right forward
-    #10 = obstacle
-    #-1 = stop all
+
+    # MEF
     def followLine(self, frame):
         lineDetector = self.detectLigne()
         distance = self.getSonar()
@@ -605,9 +477,9 @@ class Car:
             self.setSpeed(50)
             self.setWheels(180)
     
-    
+    # calcule la simulation
     def start(self,secondes):        
-            
+        # vitesse initiale
         self.setSpeed(50)
         
         frames = secondes*24
@@ -620,161 +492,4 @@ class Car:
             self.followLine(i)
             
 
-#/////////////////////////////    Fonction Test   //////////////////////////////////////////////////////////
 
-
-def testModelisation():
-    car = Car()
-    
-    
-def testDetectionObstacle(case):
-    bpy.ops.mesh.primitive_cube_add() 
-    C.active_object.name = "Obs" 
-    obs =C.active_object
-    obs.dimensions = (0.2, 0.2, 0.3)
-    obs.location = (0.0,1.8,0.0)
-    obs.rotation_euler[2] = math.pi/4
-
-    bpy.ops.mesh.primitive_cube_add() 
-    C.active_object.name = "Obs1" 
-    obs1 = C.active_object
-    obs1.dimensions = (0.2, 0.2, 0.3)
-    obs1.location = (1.0,1.0,0.0)
-
-    if case == 0:
-        car = Car(orientation = math.pi*(1.0/4.0), obstacles = [obs,obs1])
-    elif case == 1:
-        car = Car(orientation = math.pi*(12.0/20.0), obstacles = [obs,obs1])
-    else:
-        car = Car(obstacles = [obs,obs1])
-    
-    car.body.location[0] = 0.5
-    car.body.location[1] = 0.5
-
-    val = car.getSonar()
-
-
-def testSpeedAndTurn():
-
-    car = Car()
-    
-    car.setSpeed(60)
-    
-    frames = 350 
-    C.scene.frame_end = frames
-    for i in range(frames): 
-    
-        C.scene.frame_set(i) 
-        car.update1in24frame() 
-        if i == 40:
-            car.setWheels(0)
-        if i == 140:
-            car.setWheels(90)
-            car.setSpeed(30)
-        if i == 180:
-            car.setSpeed(50)
-            car.setWheels(180)
-        if i == 240:
-            car.setSpeed(0)
-    # Play
-    O.screen.animation_play() 
-    
-def testMarble():
-    car = Car(orientation = math.pi*(1.0/2.0))
-    car.setSpeed(0)
-    
-    frames = 250 
-    for i in range(frames): 
-        if i == 10:
-            car.setSpeed(60)
-        if i == 130:
-            car.setSpeed(0)
-        if i == 200:
-            car.setSpeed(65)
-        C.scene.frame_set(i) 
-        car.update1in24frame() 
-
-    # Play
-    C.scene.frame_set(0)
-    O.screen.animation_play() 
-
-def testLines(case):
-    
-    bpy.ops.mesh.primitive_plane_add() 
-    C.active_object.name = "Ligne" 
-    obs1 = C.active_object
-    obs1.scale = (0.009, 0.5, 1.0)
-    obs1.location = (0.00,1.0,0.0)
-    obs1.rotation_euler[2] = math.pi/20
-    
-    car = Car(orientation = math.pi*(1.0/2.0), rightLines = [obs1])
-    car.setSpeed(50)
-    
-    frames = 250 
-    for i in range(frames): 
-    
-        C.scene.frame_set(i) 
-        car.update1in24frame() 
-        r = car.detectLigne()
-        if r[case]:
-            car.setSpeed(0)
-        
-    # Play
-    O.screen.animation_play()
-
-def testLines2(case, straight, curve):
-    car = Car(orientation = math.radians(90), rightLines = straight, curveLines = curve)
-    car.setSpeed(50)
-    
-    frames = 500 
-    for i in range(frames): 
-    
-        C.scene.frame_set(i) 
-        car.update1in24frame() 
-        r = car.detectLigne()
-        if r[case]:
-            car.setSpeed(0)
-        
-    # Play
-    O.screen.animation_play()
-    
-def testStateMachine():
-    curve = []
-    curve.append(turnPath("2", 0.12, 90, 'R', loc_y=1))
-    curve.append(turnPath("2", 0.12, 90, 'L', loc_x = 0.24, loc_y=1))
-    #curve.append(turnPath("2", 0.12, 90, 'R', loc_y=1, loc_x = -0.24))
-    #curve.append(turnPath("2", 0.12, 90, 'L', loc_y=1))
-    line = []
-    line.append(straightPath("1", scale_y = 0.5))
-    #line.append(straightPath("1", scale_x = 0.5, loc_y = 1.12, loc_x = 0.12))
-    line.append(straightPath("1", scale_y = 0.5, loc_x = 0.24))
-    #line.append(straightPath("1", scale_y = 0.5, loc_x = -0.24))
-    
-    bpy.ops.mesh.primitive_cube_add() 
-    C.active_object.name = "Obs" 
-    obs =C.active_object
-    obs.dimensions = (0.075, 0.064, 0.115)
-    obs.location = (0.0,0.5,0.115/2)
-    
-    car = Car(orientation = math.radians(90),curveLines = curve, rightLines = line, obstacles = [obs])
-    car.start()
-
-
-# //////////////////////////   RUN TEST   ///////////////////////////////////////////////
-
-#print("Reset") 
-#clearMesh()      # destroy all mesh object && reset animation too the start
-#os.system("cls") # clean console 
-#print("Start")
-
-#testModelisation()
-#testDetectionObstacle(0)
-#testDetectionObstacle(1)
-#testSpeedAndTurn()
-#testLines(1)
-#testLines(3)
-#testMarble()
-#testStateMachine()
-
-
-#print("End")

@@ -11,7 +11,6 @@ file = os.path.join(foldername.parent.absolute(), 'tools.py')
 exec(compile(open(file).read(), file, 'exec'))
 
 
-os.system("cls") # clean console 
     
 # MarblePod
 #   -description:
@@ -163,39 +162,4 @@ class MarblePod:
                     self.marbleOnPod = False
                     
                 
-# //////////////////////////   RUN TEST   ///////////////////////////////////////////////
-      
-#clearMesh()
 
-#frames = 360
-#C.scene.frame_end = frames
-#speed = 0.6
-#s = (-0.109338794900686 + 0.93766057537244 * speed - 1.66404133282705 * (speed ** 2) + 1.33975259843262 * (speed ** 3))/24
-
-#mp = MarblePod()
-#mp.initMove([0.0,0.0,0.0])
-
-#for i in range(frames):
-#    C.scene.frame_set(i)
-##    print(i)
-#    if i> 50 and i< 120:
-#        mp.pod.location[0] = mp.pod.location[0] + s*(2**0.5)/2
-#        mp.pod.location[1] = mp.pod.location[1] + s*(2**0.5)/2
-#        
-#        
-#    if i> 120 and i< 170:
-#        mp.pod.location[1] = mp.pod.location[1] + s
-#    if i> 170 and i< 240:
-#        mp.pod.location[0] = mp.pod.location[0] - s*(2**0.5)/2
-#        mp.pod.location[1] = mp.pod.location[1] + s*(2**0.5)/2
-#    if i> 240 and i< 340:
-#        mp.pod.location[1] = mp.pod.location[1] - s
-#    
-#    
-#    if i> 49:
-#        mp.pod.keyframe_insert(data_path = 'location')
-#        mp.updateMarbleFrame()
-
-#    
-#C.scene.frame_set(0)
-#O.screen.animation_play()

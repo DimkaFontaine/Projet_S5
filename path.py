@@ -12,7 +12,7 @@ exec(compile(open(file).read(), file, 'exec'))
 
 # curvePath
 #   -description:
-#       Permet d'initialiser un parcour courbé
+#       Courbe qui peut être manipulé par la classe Car
 #   -param:
 #       -Object: Objet sur lequel le parcour sera centré
 #       -Center: Position de centre initiale
@@ -152,142 +152,7 @@ def buildObstacle():
     obs.dimensions = (0.075, 0.064, 0.115)
     return obs
 
-#test path creation functions  
 
-# straightLineForwardTest()
-#   -description:
-#       Test pour une ligne droite. Le véhicule avance
-#   -param: NONE
-#   -return:
-#       [0]: lines
-#       [1]: curves
-#       [2]: obstacle
-def straightLineForwardTest():
-    curves = []
-    lines = []
-    obstacle = []
-    lines.append(straightPath("StraightLineForward", scale_y = 0.5, loc_y = 1))
-    lines[0].location[1] = 0.5
-    return lines, curves, obstacle
-    
-# straightLineForwardTest()
-#   -description:
-#       Test pour une ligne droite. Le véhicule recule
-#   -param: NONE
-#   -return:
-#       [0]: lines
-#       [1]: curves
-#       [2]: obstacle
-def straightLineBackwardTest():
-    curves = []
-    lines = []
-    obstacle = []
-    lines.append(straightPath("StraightLineForward", scale_y = 0.5, loc_y = 1))
-    lines[0].location[1] = -0.5
-    return lines, curves, obstacle
-
-# straightLineForwardWithObstacleTest()
-#   -description:
-#       Test pour une ligne droite avec un obstacle. Le véhicule avance.
-#   -param: NONE
-#   -return:
-#       [0]: lines
-#       [1]: curves
-#       [2]: obstacle
-def straightLineForwardWithObstacleTest():
-    curves = []
-    lines = []
-    obstacle = []
-    lines.append(straightPath("StraightLineForward", scale_y = 0.5, loc_y = 1))
-    lines[0].location[1] = 0.5
-    obstacle.append(buildObstacle())
-    obstacle[0].location = (0,1,0)
-    return lines, curves, obstacle
-
-# straightLineForwardWithObstacleInMiddleTest()
-#   -description:
-#       Test pour une ligne droite avec un obstacle au milieu de la ligne. Le véhicule avance.
-#   -param: NONE
-#   -return:
-#       [0]: lines
-#       [1]: curves
-#       [2]: obstacle
-def straightLineForwardWithObstacleInMiddleTest():
-    curves = []
-    lines = []
-    obstacle = []
-    lines.append(straightPath("StraightLineForward", scale_y = 1, loc_y = 0))
-    obstacle.append(buildObstacle())
-    obstacle[0].location = (0,1,0.1)
-    return lines, curves, obstacle
-
-# leftCurveTest()
-#   -description:
-#       Test pour une courbe à gauche.
-#   -param: NONE
-#   -return:
-#       [0]: lines
-#       [1]: curves
-#       [2]: obstacle
-def leftCurveTest():
-    curves = []
-    lines = []
-    obstacle = []
-    curves.append(turnPath("leftTest", 0.36, 90, direction = 'L'))
-    return lines, curves, obstacle
-
-#  rightCurveTest()
-#   -description:
-#       Test pour une courbe à gauche.
-#   -param: NONE
-#   -return:
-#       [0]: lines
-#       [1]: curves
-#       [2]: obstacle
-def rightCurveTest():
-    curves = []
-    lines = []
-    obstacle = []
-    curves.append(turnPath("leftTest", 0.36, 90, direction = 'L'))
-    curves[0].rotate(math.pi/2)
-    curves[0].move(0.72,0)
-    return lines, curves, obstacle
-
-#  tightLeftCurveTest()
-#   -description:
-#       Test pour une courbe serrée à gauche.
-#   -param: NONE
-#   -return:
-#       [0]: lines
-#       [1]: curves
-#       [2]: obstacle
-def tightLeftCurveTest():
-    curves = []
-    lines = []
-    obstacle = []
-    curves.append(turnPath("leftTest", 0.12, 90, direction = 'L'))
-    curves.append(turnPath("leftTest", 0.12, 90, direction = 'L'))
-    curves[0].rotate(math.pi/2)
-    return lines, curves, obstacle
-    
-#  tightRightCurveTest()
-#   -description:
-#       Test pour une courbe serrée à droite.
-#   -param: NONE
-#   -return:
-#       [0]: lines
-#       [1]: curves
-#       [2]: obstacle
-def tightRightCurveTest():
-    curves = []
-    lines = []
-    obstacle = []
-    curves.append(turnPath("leftTest", 0.12, 90, direction = 'L'))
-    curves.append(turnPath("leftTest", 0.12, 90, direction = 'L'))
-    curves[0].rotate(math.pi/2)
-    curves[0].move(0.24,0)
-    curves[1].move(0.24,0)
-    return lines, curves, obstacle
 
 
     
